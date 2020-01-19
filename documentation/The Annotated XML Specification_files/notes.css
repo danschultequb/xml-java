@@ -1,0 +1,29 @@
+BODY { font-size: 90%; background-color: #c0d9c0; }
+P {  font-family: arial, helvetica, sans-serif; }
+.BQ {  margin-left: 1em; font-family: arial, helvetica, sans-serif;  }
+OL {  font-family: arial, helvetica, sans-serif; }
+UL {  font-family: arial, helvetica, sans-serif; }
+DL {  font-family: arial, helvetica, sans-serif; }
+DT {  font-family: arial, helvetica, sans-serif; }
+DD {  font-family: arial, helvetica, sans-serif; }
+H1 {  font-family: arial, helvetica, sans-serif; }
+H2 {  font-family: arial, helvetica, sans-serif; }
+H3 {  font-family: arial, helvetica, sans-serif; }
+H4 {  font-family: arial, helvetica, sans-serif; }
+H5 {  font-family: arial, helvetica, sans-serif; }
+H6 {  font-family: arial, helvetica, sans-serif; }
+TT { font-family: courier; font-weight: bold; }
+.TT { font-family: courier; font-weight: bold; }
+.nav { font-family: arial, helvetica, sans-serif; }
+LI { text-indent: 0; }
+
+.Indent { text-indent: 1em; }
+
+
+.Tech { color: red; font-size: 75%; font-family: arial, helvetica, sans-serif; color: red; font-weight: normal; }
+.History { color: red; font-size: 75%; font-family: arial, helvetica, sans-serif; color: red; font-weight: normal; }
+.Using { color: red; font-size: 75%; font-family: arial, helvetica, sans-serif; color: red; font-weight: normal; }
+.Misc { color: red; font-size: 75%; font-family: arial, helvetica, sans-serif; color: red; font-weight: normal; }
+.Example { color: red; font-size: 75%; font-family: arial, helvetica, sans-serif; color: red; font-weight: normal; }
+
+
