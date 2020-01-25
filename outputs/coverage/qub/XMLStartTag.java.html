@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLStartTag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">qub</a> &gt; <span class="el_source">XMLStartTag.java</span></div><h1>XMLStartTag.java</h1><pre class="source lang-java linenums">package qub;
+
+public class XMLStartTag implements XMLAttributeTag, XMLAttributeContainer
+{
+    private final String name;
+    private final XMLAttributes attributes;
+
+    private XMLStartTag(String name)
+<span class="fc" id="L9">    {</span>
+<span class="fc" id="L10">        PreCondition.assertNotNullAndNotEmpty(name, &quot;name&quot;);</span>
+
+<span class="fc" id="L12">        this.name = name;</span>
+<span class="fc" id="L13">        this.attributes = XMLAttributes.create();</span>
+<span class="fc" id="L14">    }</span>
+
+    public static XMLStartTag create(String name)
+    {
+<span class="fc" id="L18">        PreCondition.assertNotNullAndNotEmpty(name, &quot;name&quot;);</span>
+
+<span class="fc" id="L20">        return new XMLStartTag(name);</span>
+    }
+
+    public static XMLStartTag create(String name, Iterable&lt;XMLAttribute&gt; attributes)
+    {
+<span class="nc" id="L25">        return XMLStartTag.create(name).setAttributes(attributes);</span>
+    }
+
+    @Override
+    public String getName()
+    {
+<span class="fc" id="L31">        return this.name;</span>
+    }
+
+    @Override
+    public XMLStartTag setAttribute(String attributeName, String attributeValue)
+    {
+<span class="fc" id="L37">        PreCondition.assertNotNullAndNotEmpty(attributeName, &quot;attributeName&quot;);</span>
+<span class="fc" id="L38">        PreCondition.assertNotNull(attributeValue, &quot;attributeValue&quot;);</span>
+
+<span class="fc" id="L40">        this.attributes.setAttribute(attributeName, attributeValue);</span>
+<span class="fc" id="L41">        return this;</span>
+    }
+
+    @Override
+    public XMLStartTag setAttribute(XMLAttribute attribute)
+    {
+<span class="fc" id="L47">        return (XMLStartTag)XMLAttributeTag.super.setAttribute(attribute);</span>
+    }
+
+    @Override
+    public XMLStartTag setAttributes(Iterable&lt;XMLAttribute&gt; attribute)
+    {
+<span class="fc" id="L53">        return (XMLStartTag)XMLAttributeTag.super.setAttributes(attribute);</span>
+    }
+
+    @Override
+    public Iterable&lt;XMLAttribute&gt; getAttributes()
+    {
+<span class="fc" id="L59">        return this.attributes;</span>
+    }
+
+    @Override
+    public Result&lt;String&gt; getAttributeValue(String attributeName)
+    {
+<span class="fc" id="L65">        return this.attributes.getAttributeValue(attributeName);</span>
+    }
+
+    @Override
+    public String toString()
+    {
+<span class="fc" id="L71">        return XML.toString(this);</span>
+    }
+
+    @Override
+    public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
+    {
+<span class="fc" id="L77">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L78">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L79">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+
+<span class="fc" id="L81">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L83">            int result = 0;</span>
+
+<span class="fc" id="L85">            result += stream.write('&lt;').await();</span>
+<span class="fc" id="L86">            result += stream.write(this.name).await();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (this.attributes.any())</span>
+            {
+<span class="fc" id="L89">                result += stream.write(' ').await();</span>
+<span class="fc" id="L90">                result += this.attributes.toString(stream, format).await();</span>
+            }
+<span class="fc" id="L92">            result += stream.write('&gt;').await();</span>
+
+<span class="fc" id="L94">            return result;</span>
+        });
+    }
+
+    @Override
+    public boolean equals(Object rhs)
+    {
+<span class="fc bfc" id="L101" title="All 4 branches covered.">        return rhs instanceof XMLStartTag &amp;&amp; this.equals((XMLStartTag)rhs);</span>
+    }
+
+    public boolean equals(XMLStartTag rhs)
+    {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            this.name.equals(rhs.name) &amp;&amp;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            this.attributes.equals(rhs.attributes);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

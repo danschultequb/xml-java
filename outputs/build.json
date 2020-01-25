@@ -15,12 +15,131 @@
     }
   },
   "sources/qub/XML.java": {
-    "lastModified": "2020-01-19T04:15:58.970148086Z"
+    "lastModified": "2020-01-25T02:22:37.518529891Z",
+    "dependencies": [
+      "sources/qub/XMLAttribute.java",
+      "sources/qub/XMLCData.java",
+      "sources/qub/XMLComment.java",
+      "sources/qub/XMLDeclaration.java",
+      "sources/qub/XMLDocument.java",
+      "sources/qub/XMLElement.java",
+      "sources/qub/XMLFormat.java",
+      "sources/qub/XMLText.java"
+    ]
   },
-  "tests/qub/XMLTests.java": {
-    "lastModified": "2020-01-19T04:09:18.505770921Z",
+  "sources/qub/XMLAttribute.java": {
+    "lastModified": "2020-01-25T01:25:52.837553977Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLCData.java": {
+    "lastModified": "2020-01-25T01:25:52.767483949Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLElementChild.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLComment.java": {
+    "lastModified": "2020-01-25T01:30:18.938896894Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLElementChild.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLDeclaration.java": {
+    "lastModified": "2020-01-25T01:30:28.316250085Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLDocument.java": {
+    "lastModified": "2020-01-25T00:44:05.512660980Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLDeclaration.java",
+      "sources/qub/XMLElement.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLElement.java": {
+    "lastModified": "2020-01-25T01:44:23.288927078Z",
+    "dependencies": [
+      "sources/qub/XMLAttribute.java",
+      "sources/qub/XMLElementChild.java",
+      "sources/qub/XMLFormat.java",
+      "sources/qub/XMLText.java"
+    ]
+  },
+  "sources/qub/XMLElementChild.java": {
+    "lastModified": "2020-01-25T01:36:55.067869901Z",
+    "dependencies": [
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "sources/qub/XMLFormat.java": {
+    "lastModified": "2020-01-19T21:07:06.717595100Z",
     "dependencies": [
       "sources/qub/XML.java"
+    ]
+  },
+  "sources/qub/XMLText.java": {
+    "lastModified": "2020-01-25T01:37:29.877909898Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLElementChild.java",
+      "sources/qub/XMLFormat.java"
+    ]
+  },
+  "tests/qub/XMLAttributeTests.java": {
+    "lastModified": "2020-01-23T15:33:38.087218999Z",
+    "dependencies": [
+      "sources/qub/XMLAttribute.java"
+    ]
+  },
+  "tests/qub/XMLCDataTests.java": {
+    "lastModified": "2020-01-24T15:48:37.228408098Z",
+    "dependencies": [
+      "sources/qub/XMLCData.java"
+    ]
+  },
+  "tests/qub/XMLCommentTests.java": {
+    "lastModified": "2020-01-24T15:36:18.955744028Z",
+    "dependencies": [
+      "sources/qub/XMLComment.java"
+    ]
+  },
+  "tests/qub/XMLDeclarationTests.java": {
+    "lastModified": "2020-01-25T01:37:46.398488044Z",
+    "dependencies": [
+      "sources/qub/XMLDeclaration.java"
+    ]
+  },
+  "tests/qub/XMLDocumentTests.java": {
+    "lastModified": "2020-01-19T18:36:27.373387098Z",
+    "dependencies": [
+      "sources/qub/XMLDocument.java"
+    ]
+  },
+  "tests/qub/XMLTests.java": {
+    "lastModified": "2020-01-25T02:22:03.738023042Z",
+    "dependencies": [
+      "sources/qub/XML.java",
+      "sources/qub/XMLCData.java",
+      "sources/qub/XMLDeclaration.java",
+      "sources/qub/XMLDocument.java",
+      "sources/qub/XMLElement.java",
+      "sources/qub/XMLText.java"
+    ]
+  },
+  "tests/qub/XMLTextTests.java": {
+    "lastModified": "2020-01-24T15:49:27.730825901Z",
+    "dependencies": [
+      "sources/qub/XMLText.java"
     ]
   }
 }

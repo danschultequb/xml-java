@@ -1,14 +1,104 @@
 {
   "classFiles": {
     "qub/XML.class": {
-      "lastModified": "2020-01-19T04:16:01.828110933Z",
+      "lastModified": "2020-01-25T02:22:44.270669937Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLAttribute.class": {
+      "lastModified": "2020-01-25T02:22:44.699860095Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLAttributeTests.class": {
+      "lastModified": "2020-01-25T02:22:45.420592069Z",
+      "passedTestCount": 43,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLCData.class": {
+      "lastModified": "2020-01-25T02:22:44.603652Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLCDataTests.class": {
+      "lastModified": "2020-01-25T02:22:45.627077102Z",
+      "passedTestCount": 11,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLComment.class": {
+      "lastModified": "2020-01-25T02:22:44.567687988Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLCommentTests.class": {
+      "lastModified": "2020-01-25T02:22:45.771428108Z",
+      "passedTestCount": 11,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLDeclaration.class": {
+      "lastModified": "2020-01-25T02:22:44.821557044Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLDeclarationTests.class": {
+      "lastModified": "2020-01-25T02:22:46.113262891Z",
+      "passedTestCount": 39,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLDocument.class": {
+      "lastModified": "2020-01-25T02:22:44.368050098Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLDocumentTests.class": {
+      "lastModified": "2020-01-25T02:22:46.220241069Z",
+      "passedTestCount": 6,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLElement.class": {
+      "lastModified": "2020-01-25T02:22:44.510545969Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLElementChild.class": {
+      "lastModified": "2020-01-25T02:22:44.531444072Z",
+      "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLFormat.class": {
+      "lastModified": "2020-01-25T02:22:44.741131067Z",
       "passedTestCount": 0,
       "skippedTestCount": 0,
       "failedTestCount": 0
     },
     "qub/XMLTests.class": {
-      "lastModified": "2020-01-19T04:16:01.919112920Z",
+      "lastModified": "2020-01-25T02:22:46.553684949Z",
+      "passedTestCount": 265,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLText.class": {
+      "lastModified": "2020-01-25T02:22:44.736958026Z",
       "passedTestCount": 0,
+      "skippedTestCount": 0,
+      "failedTestCount": 0
+    },
+    "qub/XMLTextTests.class": {
+      "lastModified": "2020-01-25T02:22:46.736301898Z",
+      "passedTestCount": 15,
       "skippedTestCount": 0,
       "failedTestCount": 0
     }

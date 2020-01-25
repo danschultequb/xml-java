@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLText.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">qub</a> &gt; <span class="el_source">XMLText.java</span></div><h1>XMLText.java</h1><pre class="source lang-java linenums">package qub;
+
+public class XMLText implements XMLElementChild
+{
+    private final String text;
+    private final boolean isWhitespace;
+
+    private XMLText(String text, boolean isWhitespace)
+<span class="fc" id="L9">    {</span>
+<span class="fc" id="L10">        PreCondition.assertNotNullAndNotEmpty(text, &quot;text&quot;);</span>
+
+<span class="fc" id="L12">        this.text = text;</span>
+<span class="fc" id="L13">        this.isWhitespace = isWhitespace;</span>
+<span class="fc" id="L14">    }</span>
+
+    public static XMLText create(String text)
+    {
+<span class="fc" id="L18">        PreCondition.assertNotNullAndNotEmpty(text, &quot;text&quot;);</span>
+
+<span class="fc" id="L20">        return XMLText.create(text, XMLText.isWhitespace(text));</span>
+    }
+
+    public static XMLText create(String text, boolean isWhitespace)
+    {
+<span class="fc" id="L25">        PreCondition.assertNotNullAndNotEmpty(text, &quot;text&quot;);</span>
+
+<span class="fc" id="L27">        return new XMLText(text, isWhitespace);</span>
+    }
+
+    public String getText()
+    {
+<span class="fc" id="L32">        return this.text;</span>
+    }
+
+    public boolean isWhitespace()
+    {
+<span class="fc" id="L37">        return this.isWhitespace;</span>
+    }
+
+    @Override
+    public String toString()
+    {
+<span class="fc" id="L43">        return XML.toString(this::toString);</span>
+    }
+
+    @Override
+    public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
+    {
+<span class="fc" id="L49">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L50">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L51">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+
+<span class="fc" id="L53">        return stream.write(this.text);</span>
+    }
+
+    @Override
+    public boolean equals(Object rhs)
+    {
+<span class="fc bfc" id="L59" title="All 4 branches covered.">        return rhs instanceof XMLText &amp;&amp; this.equals((XMLText)rhs);</span>
+    }
+
+    public boolean equals(XMLText rhs)
+    {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            this.text.equals(rhs.text);</span>
+    }
+
+    public static boolean isWhitespace(String text)
+    {
+<span class="fc" id="L70">        PreCondition.assertNotNull(text, &quot;text&quot;);</span>
+
+<span class="fc" id="L72">        boolean result = true;</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        for (final char c : text.toCharArray())</span>
+        {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (!Characters.isWhitespace(c))</span>
+            {
+<span class="fc" id="L77">                result = false;</span>
+<span class="fc" id="L78">                break;</span>
+            }
+        }
+
+<span class="fc" id="L82">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XML.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">qub</a> &gt; <span class="el_source">XML.java</span></div><h1>XML.java</h1><pre class="source lang-java linenums">package qub;
+
+/**
+ * A collection of functions for interacting with XML content.
+ */
+public interface XML
+{
+    /**
+     * The valid &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; characters in an XML document.
+     */
+<span class="fc" id="L11">    char[] whitespaceCharacters = new char[] { ' ', '\t', '\r', '\n' };</span>
+
+    /**
+     * The valid quote characters that can be used to surround an attribute value.
+     */
+<span class="fc" id="L16">    char[] attributeValueQuoteCharacters = new char[] { '\'', '\&quot;' };</span>
+
+    /**
+     * Parse an XMLDocument from the provided text.
+     * @param text The text to parse.
+     * @return The parsed XMLDocument.
+     */
+    static Result&lt;XMLDocument&gt; parse(String text)
+    {
+<span class="fc" id="L25">        PreCondition.assertNotNull(text, &quot;text&quot;);</span>
+
+<span class="fc" id="L27">        return XML.parse(Strings.iterable(text));</span>
+    }
+
+    /**
+     * Parse an XMLDocument from the provided characters.
+     * @param characters The characters to parse.
+     * @return The parsed XMLDocument.
+     */
+    static Result&lt;XMLDocument&gt; parse(Iterable&lt;Character&gt; characters)
+    {
+<span class="fc" id="L37">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L39">        return XML.parse(characters.iterate());</span>
+    }
+
+    /**
+     * Parse an XMLDocument from the provided characters.
+     * @param characters The characters to parse.
+     * @return The parsed XMLDocument.
+     */
+    static Result&lt;XMLDocument&gt; parse(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L49">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L51">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L53">            characters.ensureHasStarted();</span>
+
+<span class="fc" id="L55">            boolean isFirstSegment = true;</span>
+<span class="fc" id="L56">            final XMLDocument result = XMLDocument.create();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            while (characters.hasCurrent())</span>
+            {
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                switch (characters.getCurrent())</span>
+                {
+                    case '&lt;':
+<span class="fc" id="L62">                        characters.next();</span>
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                        if (!characters.hasCurrent())</span>
+                        {
+<span class="fc" id="L66">                            throw XML.missing(&quot;tag name&quot;);</span>
+                        }
+
+<span class="fc bfc" id="L69" title="All 4 branches covered.">                        switch (characters.getCurrent())</span>
+                        {
+                            case '?':
+<span class="fc" id="L72">                                characters.next();</span>
+
+<span class="fc" id="L74">                                XML.expect(characters, XML::isNameStartCharacter, &quot;declaration name (\&quot;xml\&quot;)&quot;);</span>
+
+<span class="fc" id="L76">                                final String declarationName = XML.parseName(characters).await();</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">                                if (!declarationName.equals(&quot;xml&quot;))</span>
+                                {
+<span class="fc" id="L79">                                    throw XML.expected(&quot;declaration name (\&quot;xml\&quot;)&quot;);</span>
+                                }
+
+<span class="fc" id="L82">                                XML.parseWhitespace(characters).await();</span>
+
+<span class="fc" id="L84">                                final XMLAttribute declarationVersion = XML.parseAttribute(characters, &quot;version&quot;, &quot;declaration version&quot;).await();</span>
+
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                                if (!characters.hasCurrent())</span>
+                                {
+<span class="fc" id="L88">                                    throw XML.missing(&quot;declaration right question mark ('?')&quot;);</span>
+                                }
+
+<span class="fc" id="L91">                                XMLAttribute declarationEncoding = null;</span>
+<span class="fc" id="L92">                                XMLAttribute declarationStandalone = null;</span>
+<span class="fc bfc" id="L93" title="All 4 branches covered.">                                while (characters.hasCurrent() &amp;&amp; XML.isWhitespaceCharacter(characters.getCurrent()))</span>
+                                {
+<span class="fc" id="L95">                                    XML.parseWhitespace(characters).await();</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                                    if (!characters.hasCurrent() ||</span>
+<span class="fc bfc" id="L98" title="All 4 branches covered.">                                        !XML.isNameStartCharacter(characters.getCurrent()) ||</span>
+                                        declarationStandalone != null)
+                                    {
+<span class="fc" id="L101">                                        break;</span>
+                                    }
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">                                    if (declarationEncoding == null)</span>
+                                    {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">                                        if (characters.getCurrent() == 'e')</span>
+                                        {
+<span class="fc" id="L108">                                            declarationEncoding = XML.parseAttribute(characters, &quot;encoding&quot;, &quot;declaration encoding&quot;).await();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                                            if (Strings.isNullOrEmpty(declarationEncoding.getValue()))</span>
+                                            {
+<span class="fc" id="L111">                                                throw XML.expected(&quot;declaration encoding attribute value to be not empty&quot;);</span>
+                                            }
+                                        }
+<span class="fc bfc" id="L114" title="All 2 branches covered.">                                        else if (characters.getCurrent() == 's')</span>
+                                        {
+<span class="fc" id="L116">                                            declarationStandalone = XML.parseAttribute(characters, &quot;standalone&quot;, &quot;declaration standalone&quot;).await();</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">                                            if (!Iterable.create(&quot;no&quot;, &quot;yes&quot;).contains(declarationStandalone.getValue()))</span>
+                                            {
+<span class="fc" id="L119">                                                throw XML.expected(&quot;declaration standalone attribute value to be \&quot;no\&quot; or \&quot;yes\&quot;&quot;);</span>
+                                            }
+                                        }
+                                        else
+                                        {
+<span class="fc" id="L124">                                            throw XML.expected(&quot;declaration encoding attribute, standalone attribute, or right question mark ('?')&quot;);</span>
+                                        }
+                                    }
+                                    else
+                                    {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                                        if (characters.getCurrent() == 's')</span>
+                                        {
+<span class="fc" id="L131">                                            declarationStandalone = XML.parseAttribute(characters, &quot;standalone&quot;, &quot;declaration standalone&quot;).await();</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">                                            if (!Iterable.create(&quot;no&quot;, &quot;yes&quot;).contains(declarationStandalone.getValue()))</span>
+                                            {
+<span class="fc" id="L134">                                                throw XML.expected(&quot;declaration standalone attribute value to be \&quot;no\&quot; or \&quot;yes\&quot;&quot;);</span>
+                                            }
+                                        }
+                                        else
+                                        {
+<span class="fc" id="L139">                                            throw XML.expected(&quot;declaration standalone attribute or right question mark ('?')&quot;);</span>
+                                        }
+                                    }
+                                }
+
+<span class="fc" id="L144">                                XML.expectAndTake(characters, '?', &quot;declaration right question mark ('?')&quot;);</span>
+<span class="fc" id="L145">                                XML.expectAndTake(characters, '&gt;', &quot;declaration right angle bracket ('&gt;')&quot;);</span>
+
+<span class="fc bfc" id="L147" title="All 2 branches covered.">                                if (result.getDeclaration() != null)</span>
+                                {
+<span class="fc" id="L149">                                    throw new ParseException(&quot;An XML document can only have one declaration.&quot;);</span>
+                                }
+<span class="fc bfc" id="L151" title="All 2 branches covered.">                                if (!isFirstSegment)</span>
+                                {
+<span class="fc" id="L153">                                    throw XML.expected(&quot;the XML declaration to be the first character in the document&quot;);</span>
+                                }
+
+<span class="fc" id="L156">                                final XMLDeclaration declaration = XMLDeclaration.create()</span>
+<span class="fc" id="L157">                                    .setVersion(declarationVersion.getValue());</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">                                if (declarationEncoding != null)</span>
+                                {
+<span class="fc" id="L160">                                    declaration.setEncoding(declarationEncoding.getValue());</span>
+                                }
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                                if (declarationStandalone != null)</span>
+                                {
+<span class="fc" id="L164">                                    declaration.setStandalone(declarationStandalone.getValue());</span>
+                                }
+<span class="fc" id="L166">                                result.setDeclaration(declaration);</span>
+<span class="fc" id="L167">                                break;</span>
+
+                            case '/':
+<span class="fc" id="L170">                                throw new ParseException(&quot;An XML document cannot have an end tag without a start tag.&quot;);</span>
+
+                            case '!':
+<span class="fc" id="L173">                                characters.next();</span>
+
+<span class="fc" id="L175">                                XML.expect(characters, new char[] { '-', '[' }, &quot;comment first left dash ('-') or CDATA first left square bracket ('[')&quot;);</span>
+
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                                if (characters.getCurrent() == '-')</span>
+                                {
+<span class="fc" id="L179">                                    XML.parseCommentAtFirstLeftDash(characters).await();</span>
+                                }
+                                else // if (characters.getCurrent() == '[')
+                                {
+<span class="fc" id="L183">                                    XML.parseCDataAtFirstLeftSquareBracket(characters).await();</span>
+<span class="fc" id="L184">                                    throw new ParseException(&quot;An XML document cannot have a CDATA tag at its root.&quot;);</span>
+                                }
+                                break;
+
+                            default:
+<span class="fc bfc" id="L189" title="All 2 branches covered.">                                if (XML.isNameStartCharacter(characters.getCurrent()))</span>
+                                {
+<span class="fc" id="L191">                                    final XMLElement element = XML.parseElementAtName(characters).await();</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">                                    if (result.getRoot() != null)</span>
+                                    {
+<span class="fc" id="L194">                                        throw new ParseException(&quot;An XML document can only have one root element.&quot;);</span>
+                                    }
+<span class="fc" id="L196">                                    result.setRoot(element);</span>
+<span class="fc" id="L197">                                }</span>
+                                else
+                                {
+<span class="fc" id="L200">                                    throw new ParseException(&quot;Unexpected tag name start character: &quot; + Characters.escapeAndQuote(characters.getCurrent()));</span>
+                                }
+                                break;
+                        }
+                        break;
+
+                    default:
+<span class="fc" id="L207">                        final XMLText text = XML.parseText(characters).await();</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                        if (!text.isWhitespace())</span>
+                        {
+<span class="fc" id="L210">                            throw XML.expected(&quot;only whitespace and elements at the root of the document&quot;);</span>
+                        }
+                        break;
+                }
+<span class="fc" id="L214">                isFirstSegment = false;</span>
+            }
+
+<span class="fc" id="L217">            return result;</span>
+        });
+    }
+
+    static Result&lt;XMLElement&gt; parseElementAtName(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L223">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L225">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L227">            final String name = XML.parseName(characters, &quot;start tag or empty element&quot;).await();</span>
+<span class="fc" id="L228">            final List&lt;XMLAttribute&gt; attributes = List.create();</span>
+
+<span class="fc bfc" id="L230" title="All 4 branches covered.">            while (characters.hasCurrent() &amp;&amp; XML.isWhitespaceCharacter(characters.getCurrent()))</span>
+            {
+<span class="fc" id="L232">                XML.parseWhitespace(characters).await();</span>
+
+<span class="fc bfc" id="L234" title="All 4 branches covered.">                if (characters.hasCurrent() &amp;&amp; XML.isNameStartCharacter(characters.getCurrent()))</span>
+                {
+<span class="fc" id="L236">                    attributes.add(XML.parseAttribute(characters, &quot;start tag&quot;).await());</span>
+                }
+            }
+
+            XMLElement result;
+<span class="fc bfc" id="L241" title="All 4 branches covered.">            boolean isEmptyElement = characters.hasCurrent() &amp;&amp; characters.getCurrent() == '/';</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if (isEmptyElement)</span>
+            {
+<span class="fc" id="L244">                characters.next();</span>
+            }
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            result = XMLElement.create(name, !isEmptyElement)</span>
+<span class="fc" id="L247">                .setAttributes(attributes);</span>
+
+<span class="fc bfc" id="L249" title="All 2 branches covered.">            XML.expectAndTake(characters, '&gt;', (isEmptyElement ? &quot;empty element&quot; : &quot;start tag&quot;) + &quot; right angle bracket ('&gt;')&quot;);</span>
+
+<span class="fc bfc" id="L251" title="All 2 branches covered.">            if (result.isSplit())</span>
+            {
+<span class="fc" id="L253">                boolean foundEndTag = false;</span>
+<span class="fc bfc" id="L254" title="All 4 branches covered.">                while (characters.hasCurrent() &amp;&amp; !foundEndTag)</span>
+                {
+<span class="fc bfc" id="L256" title="All 2 branches covered.">                    switch (characters.getCurrent())</span>
+                    {
+                        case '&lt;':
+<span class="fc" id="L259">                            characters.next();</span>
+
+<span class="fc bfc" id="L261" title="All 2 branches covered.">                            if (!characters.hasCurrent())</span>
+                            {
+<span class="fc" id="L263">                                throw XML.missing(&quot;tag name&quot;);</span>
+                            }
+
+<span class="fc bfc" id="L266" title="All 4 branches covered.">                            switch (characters.getCurrent())</span>
+                            {
+                                case '?':
+<span class="fc" id="L269">                                    throw XML.expected(&quot;the XML declaration to be the first character in the document&quot;);</span>
+
+                                case '/':
+<span class="fc" id="L272">                                    characters.next();</span>
+
+<span class="fc" id="L274">                                    XML.expect(characters, XML::isNameStartCharacter, &quot;end tag name&quot;);</span>
+
+<span class="fc" id="L276">                                    final String endTagName = XML.parseName(characters, &quot;end tag&quot;).await();</span>
+
+<span class="fc" id="L278">                                    XML.parseOptionalWhitespace(characters);</span>
+
+<span class="fc" id="L280">                                    XML.expectAndTake(characters, '&gt;', &quot;end tag right angle bracket ('&gt;')&quot;);</span>
+
+<span class="fc bfc" id="L282" title="All 2 branches covered.">                                    if (endTagName.equals(name))</span>
+                                    {
+<span class="fc" id="L284">                                        foundEndTag = true;</span>
+                                    }
+                                    else
+                                    {
+<span class="fc" id="L288">                                        throw XML.expected(&quot;an end tag with the name same as the current element&quot;);</span>
+                                    }
+                                    break;
+
+                                case '!':
+<span class="fc" id="L293">                                    characters.next();</span>
+
+<span class="fc" id="L295">                                    XML.expect(characters, new char[] { '-', '[' }, &quot;comment first left dash ('-') or CDATA first left square bracket ('[')&quot;);</span>
+
+<span class="fc bfc" id="L297" title="All 2 branches covered.">                                    if (characters.getCurrent() == '-')</span>
+                                    {
+<span class="fc" id="L299">                                        XML.parseCommentAtFirstLeftDash(characters).await();</span>
+                                    }
+                                    else // if (characters.getCurrent() == '[')
+                                    {
+<span class="fc" id="L303">                                        final XMLCData cdata = XML.parseCDataAtFirstLeftSquareBracket(characters).await();</span>
+<span class="fc" id="L304">                                        result.addChild(cdata);</span>
+                                    }
+<span class="fc" id="L306">                                    break;</span>
+
+                                default:
+<span class="fc bfc" id="L309" title="All 2 branches covered.">                                    if (XML.isNameStartCharacter(characters.getCurrent()))</span>
+                                    {
+<span class="fc" id="L311">                                        final XMLElement element = XML.parseElementAtName(characters).await();</span>
+<span class="fc" id="L312">                                        result.addChild(element);</span>
+<span class="fc" id="L313">                                    }</span>
+                                    else
+                                    {
+<span class="fc" id="L316">                                        throw new ParseException(&quot;Unexpected tag name start character: &quot; + Characters.escapeAndQuote(characters.getCurrent()));</span>
+                                    }
+                                    break;
+                            }
+                            break;
+
+                        default:
+<span class="fc" id="L323">                            final XMLText text = XML.parseText(characters).await();</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">                            if (!text.isWhitespace())</span>
+                            {
+<span class="fc" id="L326">                                result.addChild(text);</span>
+                            }
+<span class="fc" id="L328">                            break;</span>
+                    }
+                }
+
+<span class="fc bfc" id="L332" title="All 2 branches covered.">                if (!foundEndTag)</span>
+                {
+<span class="fc" id="L334">                    throw XML.missing(&quot;end tag&quot;);</span>
+                }
+            }
+
+<span class="fc" id="L338">            PostCondition.assertNotNull(result, &quot;result&quot;);</span>
+
+<span class="fc" id="L340">            return result;</span>
+        });
+    }
+
+    static Result&lt;XMLComment&gt; parseCommentAtFirstLeftDash(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L346">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L348">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L350">            XML.expectAndTake(characters, '-', &quot;comment first left dash ('-')&quot;);</span>
+<span class="fc" id="L351">            XML.expectAndTake(characters, '-', &quot;comment second left dash ('-')&quot;);</span>
+
+<span class="fc" id="L353">            final CharacterList commentText = CharacterList.create();</span>
+<span class="fc" id="L354">            int rightDashCount = 0;</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">            while (characters.hasCurrent())</span>
+            {
+<span class="fc bfc" id="L357" title="All 2 branches covered.">                if (characters.getCurrent() == '-')</span>
+                {
+<span class="fc" id="L359">                    characters.next();</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">                    if (rightDashCount &lt; 2)</span>
+                    {
+<span class="fc" id="L362">                        ++rightDashCount;</span>
+                    }
+                    else
+                    {
+<span class="fc" id="L366">                        commentText.add('-');</span>
+                    }
+                }
+<span class="fc bfc" id="L369" title="All 4 branches covered.">                else if (characters.getCurrent() == '&gt;' &amp;&amp; rightDashCount == 2)</span>
+                {
+<span class="fc" id="L371">                    break;</span>
+                }
+                else
+                {
+<span class="fc bfc" id="L375" title="All 2 branches covered.">                    while (rightDashCount &gt; 0)</span>
+                    {
+<span class="fc" id="L377">                        commentText.add('-');</span>
+<span class="fc" id="L378">                        --rightDashCount;</span>
+                    }
+
+<span class="fc" id="L381">                    commentText.add(characters.takeCurrent());</span>
+                }
+            }
+
+<span class="fc bfc" id="L385" title="All 2 branches covered.">            if (rightDashCount == 0)</span>
+            {
+<span class="fc" id="L387">                throw XML.missing(&quot;comment first right dash ('-')&quot;);</span>
+            }
+<span class="fc bfc" id="L389" title="All 2 branches covered.">            else if (rightDashCount == 1)</span>
+            {
+<span class="fc" id="L391">                throw XML.missing(&quot;comment second right dash ('-')&quot;);</span>
+            }
+
+<span class="fc" id="L394">            XML.expectAndTake(characters, '&gt;', &quot;comment right angle bracket ('&gt;')&quot;);</span>
+
+<span class="fc" id="L396">            return XMLComment.create(commentText.toString(true));</span>
+        });
+    }
+
+    static Result&lt;XMLCData&gt; parseCDataAtFirstLeftSquareBracket(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L402">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L404">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L406">            XML.expectAndTake(characters, '[', &quot;CDATA tag first left square bracket ('[')&quot;);</span>
+
+<span class="fc" id="L408">            final String name = XML.parseName(characters, &quot;CDATA tag&quot;).await();</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">            if (!name.equals(&quot;CDATA&quot;))</span>
+            {
+<span class="fc" id="L411">                throw XML.expected(&quot;CDATA tag name (\&quot;CDATA\&quot;)&quot;);</span>
+            }
+
+<span class="fc" id="L414">            XML.expectAndTake(characters, '[', &quot;CDATA tag second left square bracket ('[')&quot;);</span>
+
+<span class="fc" id="L416">            final CharacterList cdataText = CharacterList.create();</span>
+<span class="fc" id="L417">            int rightSquareBracketCount = 0;</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">            while (characters.hasCurrent())</span>
+            {
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                if (characters.getCurrent() == ']')</span>
+                {
+<span class="fc" id="L422">                    characters.next();</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">                    if (rightSquareBracketCount &lt; 2)</span>
+                    {
+<span class="fc" id="L425">                        ++rightSquareBracketCount;</span>
+                    }
+                    else
+                    {
+<span class="fc" id="L429">                        cdataText.add(']');</span>
+                    }
+                }
+<span class="fc bfc" id="L432" title="All 4 branches covered.">                else if (characters.getCurrent() == '&gt;' &amp;&amp; rightSquareBracketCount == 2)</span>
+                {
+<span class="fc" id="L434">                    break;</span>
+                }
+                else
+                {
+<span class="fc bfc" id="L438" title="All 2 branches covered.">                    while (rightSquareBracketCount &gt; 0)</span>
+                    {
+<span class="fc" id="L440">                        cdataText.add(']');</span>
+<span class="fc" id="L441">                        --rightSquareBracketCount;</span>
+                    }
+
+<span class="fc" id="L444">                    cdataText.add(characters.takeCurrent());</span>
+                }
+            }
+
+<span class="fc bfc" id="L448" title="All 2 branches covered.">            if (rightSquareBracketCount == 0)</span>
+            {
+<span class="fc" id="L450">                throw XML.missing(&quot;CDATA tag first right square bracket (']')&quot;);</span>
+            }
+<span class="fc bfc" id="L452" title="All 2 branches covered.">            else if (rightSquareBracketCount == 1)</span>
+            {
+<span class="fc" id="L454">                throw XML.missing(&quot;CDATA tag second right square bracket (']')&quot;);</span>
+            }
+
+<span class="fc" id="L457">            XML.expectAndTake(characters, '&gt;', &quot;CDATA tag right angle bracket ('&gt;')&quot;);</span>
+
+<span class="fc" id="L459">            return XMLCData.create(cdataText.toString(true));</span>
+        });
+    }
+
+    static Result&lt;XMLAttribute&gt; parseAttribute(Iterator&lt;Character&gt; characters, String attributeDescription)
+    {
+<span class="fc" id="L465">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L467">        return XML.parseAttribute(characters, null, attributeDescription);</span>
+    }
+
+    static Result&lt;XMLAttribute&gt; parseAttribute(Iterator&lt;Character&gt; characters, String expectedAttributeName, String attributeDescription)
+    {
+<span class="fc" id="L472">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L474">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L476">            final String description = XML.join(attributeDescription, &quot;attribute&quot;);</span>
+
+<span class="fc" id="L478">            final String name = XML.parseName(characters, description).await();</span>
+<span class="fc bfc" id="L479" title="All 4 branches covered.">            if (!Strings.isNullOrEmpty(expectedAttributeName) &amp;&amp; !expectedAttributeName.equals(name))</span>
+            {
+<span class="fc" id="L481">                throw XML.expected(description);</span>
+            }
+
+<span class="fc" id="L484">            XML.parseOptionalWhitespace(characters).await();</span>
+
+<span class="fc" id="L486">            XML.expectAndTake(characters, '=', description + &quot; equals sign ('=')&quot;);</span>
+
+<span class="fc" id="L488">            XML.parseOptionalWhitespace(characters).await();</span>
+
+<span class="fc" id="L490">            final String value = XML.parseQuotedString(characters, description + &quot; value&quot;).await();</span>
+
+<span class="fc" id="L492">            return XMLAttribute.createWithQuotedValue(name, value);</span>
+        });
+    }
+
+    /**
+     * Parse &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; from the provided characters.
+     * @param characters The characters to parse
+     *                   &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; from.
+     * @return The parsed &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; string.
+     */
+    static Result&lt;String&gt; parseWhitespace(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L504">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L506">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L508">            characters.ensureHasStarted();</span>
+
+<span class="fc" id="L510">            XML.expect(characters, XML::isWhitespaceCharacter, &quot;whitespace&quot;);</span>
+
+<span class="fc" id="L512">            return XML.parseOptionalWhitespace(characters).await();</span>
+        });
+    }
+
+    /**
+     * Parse &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; from the provided characters. If the characters
+     * don't start with whitespace, then this will return immediately.
+     * @param characters The characters to parse
+     *                   &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; from.
+     * @return The parsed &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; string.
+     */
+    static Result&lt;String&gt; parseOptionalWhitespace(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L525">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L527">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L529">            characters.ensureHasStarted();</span>
+
+<span class="fc" id="L531">            final CharacterList whitespace = CharacterList.create();</span>
+<span class="fc bfc" id="L532" title="All 4 branches covered.">            while (characters.hasCurrent() &amp;&amp; XML.isWhitespaceCharacter(characters.getCurrent()))</span>
+            {
+<span class="fc" id="L534">                whitespace.add(characters.takeCurrent());</span>
+            }
+
+<span class="fc" id="L537">            final String result = whitespace.toString(true);</span>
+
+<span class="fc" id="L539">            PostCondition.assertNotNull(result, &quot;result&quot;);</span>
+
+<span class="fc" id="L541">            return result;</span>
+        });
+    }
+
+    static Result&lt;String&gt; parseQuotedString(Iterator&lt;Character&gt; characters, String quotedStringDescription)
+    {
+<span class="fc" id="L547">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L549">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L551">            characters.ensureHasStarted();</span>
+
+<span class="fc" id="L553">            final String description = XML.join(quotedStringDescription, &quot;quoted string&quot;);</span>
+
+<span class="fc" id="L555">            final char quoteCharacter = XML.expectAndTake(characters, XML.attributeValueQuoteCharacters, description + &quot; start quote character (' or \&quot;)&quot;);</span>
+
+<span class="fc" id="L557">            final CharacterList list = CharacterList.create(quoteCharacter);</span>
+<span class="fc bfc" id="L558" title="All 4 branches covered.">            while (characters.hasCurrent() &amp;&amp; characters.getCurrent() != quoteCharacter)</span>
+            {
+<span class="fc" id="L560">                list.add(characters.takeCurrent());</span>
+            }
+
+<span class="fc bfc" id="L563" title="All 2 branches covered.">            if (!characters.hasCurrent())</span>
+            {
+<span class="fc" id="L565">                throw XML.missing(description + &quot; end quote character (&quot; + quoteCharacter + &quot;)&quot;);</span>
+            }
+            else
+            {
+<span class="fc" id="L569">                list.add(characters.takeCurrent());</span>
+            }
+
+<span class="fc" id="L572">            final String result = list.toString(true);</span>
+
+<span class="fc" id="L574">            PostCondition.assertNotNullAndNotEmpty(result, &quot;result&quot;);</span>
+<span class="fc" id="L575">            PostCondition.assertTrue(Strings.isQuoted(result), &quot;Strings.isQuoted(result)&quot;);</span>
+
+<span class="fc" id="L577">            return result;</span>
+        });
+    }
+
+    /**
+     * Parse an &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt; from the provided characters.
+     * @param characters The characters to parse an &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt; from.
+     * @return The parsed &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt;.
+     */
+    static Result&lt;String&gt; parseName(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L588">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L590">        return XML.parseName(characters, &quot;&quot;);</span>
+    }
+
+    /**
+     * Parse an &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt; from the provided characters.
+     * @param characters The characters to parse an &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt; from.
+     * @return The parsed &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-Name&quot;&gt;XML name&lt;/a&gt;.
+     */
+    static Result&lt;String&gt; parseName(Iterator&lt;Character&gt; characters, String nameDescription)
+    {
+<span class="fc" id="L600">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+
+<span class="fc" id="L602">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L604">            characters.ensureHasStarted();</span>
+
+<span class="fc" id="L606">            XML.expect(characters, XML::isNameStartCharacter, XML.join(nameDescription, &quot;name start character&quot;));</span>
+
+<span class="fc" id="L608">            final CharacterList name = CharacterList.create(characters.takeCurrent());</span>
+<span class="fc bfc" id="L609" title="All 4 branches covered.">            while (characters.hasCurrent() &amp;&amp; XML.isNameCharacter(characters.getCurrent()))</span>
+            {
+<span class="fc" id="L611">                name.add(characters.takeCurrent());</span>
+            }
+
+<span class="fc" id="L614">            final String result = name.toString(true);</span>
+
+<span class="fc" id="L616">            PostCondition.assertNotNullAndNotEmpty(result, &quot;result&quot;);</span>
+
+<span class="fc" id="L618">            return result;</span>
+        });
+    }
+
+    static Result&lt;XMLText&gt; parseText(Iterator&lt;Character&gt; characters)
+    {
+<span class="fc" id="L624">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L625">        PreCondition.assertTrue(characters.hasCurrent(), &quot;characters.hasCurrent()&quot;);</span>
+
+<span class="fc" id="L627">        return Result.create(() -&gt;</span>
+        {
+<span class="fc" id="L629">            final CharacterList text = CharacterList.create();</span>
+
+<span class="fc" id="L631">            boolean isWhitespace = true;</span>
+<span class="fc bfc" id="L632" title="All 4 branches covered.">            while (characters.hasCurrent() &amp;&amp; characters.getCurrent() != '&lt;')</span>
+            {
+<span class="fc bfc" id="L634" title="All 4 branches covered.">                if (isWhitespace &amp;&amp; !XML.isWhitespaceCharacter(characters.getCurrent()))</span>
+                {
+<span class="fc" id="L636">                    isWhitespace = false;</span>
+                }
+
+<span class="fc" id="L639">                text.add(characters.takeCurrent());</span>
+            }
+
+<span class="fc" id="L642">            return XMLText.create(text.toString(true), isWhitespace);</span>
+        });
+    }
+
+    /**
+     * Get whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-NameStartChar&quot;&gt;name start character&lt;/a&gt;.
+     * @param character The character to check.
+     * @return Whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-NameStartChar&quot;&gt;name start character&lt;/a&gt;.
+     */
+    static boolean isNameStartCharacter(char character)
+    {
+<span class="fc bfc" id="L655" title="All 56 branches covered.">        return character == ':' ||</span>
+            ('A' &lt;= character &amp;&amp; character &lt;= 'Z') ||
+            character == '_' ||
+            ('a' &lt;= character &amp;&amp; character &lt;= 'z') ||
+            (0x00C0 &lt;= character &amp;&amp; character &lt;= 0x00D6) ||
+            (0x00D8 &lt;= character &amp;&amp; character &lt;= 0x00F6) ||
+            (0x00F8 &lt;= character &amp;&amp; character &lt;= 0x02FF) ||
+            (0x0370 &lt;= character &amp;&amp; character &lt;= 0x037D) ||
+            (0x037F &lt;= character &amp;&amp; character &lt;= 0x1FFF) ||
+            (0x200C &lt;= character &amp;&amp; character &lt;= 0x200D) ||
+            (0x2070 &lt;= character &amp;&amp; character &lt;= 0x218F) ||
+            (0x2C00 &lt;= character &amp;&amp; character &lt;= 0x2FEF) ||
+            (0x3001 &lt;= character &amp;&amp; character &lt;= 0xD7FF) ||
+            (0xF900 &lt;= character &amp;&amp; character &lt;= 0xFDCF) ||
+            (0xFDF0 &lt;= character &amp;&amp; character &lt;= 0xFFFD);
+    }
+
+    /**
+     * Get whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-NameChar&quot;&gt;name character&lt;/a&gt;.
+     * @param character The character to check.
+     * @return Whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-NameChar&quot;&gt;name character&lt;/a&gt;.
+     */
+    static boolean isNameCharacter(char character)
+    {
+<span class="fc bfc" id="L681" title="All 20 branches covered.">        return XML.isNameStartCharacter(character) ||</span>
+            character == '-' ||
+            character == '.' ||
+            ('0' &lt;= character &amp;&amp; character &lt;= '9') ||
+            character == 0x00B7 ||
+            (0x0300 &lt;= character &amp;&amp; character &lt;= 0x036F) ||
+            (0x203F &lt;= character &amp;&amp; character &lt;= 0x2040);
+    }
+
+    /**
+     * Get whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; character.
+     * @param character The character to check.
+     * @return Whether or not the provided character is a
+     * &lt;a href=&quot;https://www.w3.org/TR/xml/#NT-S&quot;&gt;whitespace&lt;/a&gt; character.
+     */
+    static boolean isWhitespaceCharacter(char character)
+    {
+<span class="fc bfc" id="L699" title="All 8 branches covered.">        return character == ' ' ||</span>
+            character == '\n' ||
+            character == '\r' ||
+            character == '\t';
+    }
+
+    static char expectAndTake(Iterator&lt;Character&gt; characters, char expectedCharacter, String description)
+    {
+<span class="fc" id="L707">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L708">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc bfc" id="L710" title="All 2 branches covered.">        return XML.expectAndTake(characters, (Character character) -&gt; character == expectedCharacter, description);</span>
+    }
+
+    static void expect(Iterator&lt;Character&gt; characters, char[] expectedCharacters, String description)
+    {
+<span class="fc" id="L715">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L716">        PreCondition.assertNotNullAndNotEmpty(expectedCharacters, &quot;expectedCharacters&quot;);</span>
+<span class="fc" id="L717">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc" id="L719">        XML.expect(characters, (Character character) -&gt; Array.contains(expectedCharacters, character), description);</span>
+<span class="fc" id="L720">    }</span>
+
+    static char expectAndTake(Iterator&lt;Character&gt; characters, char[] expectedCharacters, String description)
+    {
+<span class="fc" id="L724">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L725">        PreCondition.assertNotNullAndNotEmpty(expectedCharacters, &quot;expectedCharacters&quot;);</span>
+<span class="fc" id="L726">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc" id="L728">        return XML.expectAndTake(characters, (Character character) -&gt; Array.contains(expectedCharacters, character), description);</span>
+    }
+
+    static void expect(Iterator&lt;Character&gt; characters, Function1&lt;Character,Boolean&gt; expectation, String description)
+    {
+<span class="fc" id="L733">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L734">        PreCondition.assertNotNull(expectation, &quot;expectation&quot;);</span>
+<span class="fc" id="L735">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc bfc" id="L737" title="All 2 branches covered.">        if (!characters.hasCurrent())</span>
+        {
+<span class="fc" id="L739">            throw XML.missing(description);</span>
+        }
+<span class="fc bfc" id="L741" title="All 2 branches covered.">        if (!expectation.run(characters.getCurrent()))</span>
+        {
+<span class="fc" id="L743">            throw XML.expected(description);</span>
+        }
+<span class="fc" id="L745">    }</span>
+
+    static char expectAndTake(Iterator&lt;Character&gt; characters, Function1&lt;Character,Boolean&gt; expectation, String description)
+    {
+<span class="fc" id="L749">        PreCondition.assertNotNull(characters, &quot;characters&quot;);</span>
+<span class="fc" id="L750">        PreCondition.assertNotNull(expectation, &quot;expectation&quot;);</span>
+<span class="fc" id="L751">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc" id="L753">        XML.expect(characters, expectation, description);</span>
+<span class="fc" id="L754">        return characters.takeCurrent();</span>
+    }
+
+    static String join(String... values)
+    {
+<span class="fc" id="L759">        PreCondition.assertNotNullAndNotEmpty(values, &quot;values&quot;);</span>
+
+<span class="fc" id="L761">        final CharacterList builder = CharacterList.create();</span>
+<span class="fc bfc" id="L762" title="All 2 branches covered.">        for (final String value : values)</span>
+        {
+<span class="fc bfc" id="L764" title="All 2 branches covered.">            if (!Strings.isNullOrEmpty(value))</span>
+            {
+<span class="fc bfc" id="L766" title="All 2 branches covered.">                if (builder.any())</span>
+                {
+<span class="fc" id="L768">                    builder.add(' ');</span>
+                }
+<span class="fc" id="L770">                builder.addAll(value);</span>
+            }
+        }
+<span class="fc" id="L773">        final String result = builder.toString(true);</span>
+
+<span class="fc" id="L775">        PostCondition.assertNotNullAndNotEmpty(result, &quot;result&quot;);</span>
+
+<span class="fc" id="L777">        return result;</span>
+    }
+
+    static ParseException missing(String description)
+    {
+<span class="fc" id="L782">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc" id="L784">        return new ParseException(&quot;Missing &quot; + description + &quot;.&quot;);</span>
+    }
+
+    static ParseException expected(String description)
+    {
+<span class="fc" id="L789">        PreCondition.assertNotNullAndNotEmpty(description, &quot;description&quot;);</span>
+
+<span class="fc" id="L791">        return new ParseException(&quot;Expected &quot; + description + &quot;.&quot;);</span>
+    }
+
+    static String toString(Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt; toStringFunction)
+    {
+<span class="fc" id="L796">        return XML.toString(XMLFormat.consise, toStringFunction);</span>
+    }
+
+    static String toString(XMLFormat format, Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt; toStringFunction)
+    {
+<span class="fc" id="L801">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+<span class="fc" id="L802">        PreCondition.assertNotNull(toStringFunction, &quot;toStringFunction&quot;);</span>
+
+<span class="fc" id="L804">        return XML.toString((IndentedCharacterWriteStream stream) -&gt; toStringFunction.run(stream, format));</span>
+    }
+
+    static String toString(Function1&lt;IndentedCharacterWriteStream,Result&lt;Integer&gt;&gt; toStringFunction)
+    {
+<span class="fc" id="L809">        PreCondition.assertNotNull(toStringFunction, &quot;toStringFunction&quot;);</span>
+
+<span class="fc" id="L811">        final InMemoryCharacterStream stream = new InMemoryCharacterStream();</span>
+<span class="fc" id="L812">        final IndentedCharacterWriteStream indentedStream = new IndentedCharacterWriteStream(stream);</span>
+<span class="fc" id="L813">        toStringFunction.run(indentedStream).await();</span>
+<span class="fc" id="L814">        return stream.getText().await();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>
