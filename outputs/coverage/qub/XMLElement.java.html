@@ -9,16 +9,16 @@ public class XMLElement implements XMLElementChild
 
     private XMLElement(String name, boolean split)
 <span class="fc" id="L11">    {</span>
-<span class="fc" id="L12">        this.name = name;</span>
-<span class="fc" id="L13">        this.attributes = Map.create();</span>
-<span class="fc" id="L14">        this.split = split;</span>
-<span class="fc" id="L15">        this.children = List.create();</span>
-<span class="fc" id="L16">    }</span>
+<span class="fc" id="L12">        PreCondition.assertNotNullAndNotEmpty(name, &quot;name&quot;);</span>
+
+<span class="fc" id="L14">        this.name = name;</span>
+<span class="fc" id="L15">        this.attributes = Map.create();</span>
+<span class="fc" id="L16">        this.split = split;</span>
+<span class="fc" id="L17">        this.children = List.create();</span>
+<span class="fc" id="L18">    }</span>
 
     public static XMLElement create(String name)
     {
-<span class="fc" id="L20">        PreCondition.assertNotNullAndNotEmpty(name, &quot;name&quot;);</span>
-
 <span class="fc" id="L22">        return XMLElement.create(name, false);</span>
     }
 
@@ -27,140 +27,171 @@ public class XMLElement implements XMLElementChild
 <span class="fc" id="L27">        return new XMLElement(name, split);</span>
     }
 
-    public static XMLElement create(String name, String textContent)
-    {
-<span class="nc" id="L32">        PreCondition.assertNotNullAndNotEmpty(name, &quot;name&quot;);</span>
-<span class="nc" id="L33">        PreCondition.assertNotNull(textContent, &quot;textContent&quot;);</span>
-
-<span class="nc" id="L35">        final XMLElement result = XMLElement.create(name, true);</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (!Strings.isNullOrEmpty(textContent))</span>
-        {
-<span class="nc" id="L38">            result.addChild(XMLText.create(textContent));</span>
-        }
-
-<span class="nc" id="L41">        PostCondition.assertNotNull(result, &quot;result&quot;);</span>
-
-<span class="nc" id="L43">        return result;</span>
-    }
-
     public String getName()
     {
-<span class="nc" id="L48">        return this.name;</span>
+<span class="fc" id="L32">        return this.name;</span>
     }
 
     public boolean isSplit()
     {
-<span class="fc" id="L53">        return this.split;</span>
+<span class="fc" id="L37">        return this.split;</span>
     }
 
     public XMLElement setAttribute(String attributeName, String attributeValue)
     {
-<span class="fc" id="L58">        PreCondition.assertNotNullAndNotEmpty(attributeName, &quot;attributeName&quot;);</span>
-<span class="fc" id="L59">        PreCondition.assertNotNull(attributeValue, &quot;attributeValue&quot;);</span>
+<span class="fc" id="L42">        PreCondition.assertNotNullAndNotEmpty(attributeName, &quot;attributeName&quot;);</span>
+<span class="fc" id="L43">        PreCondition.assertNotNull(attributeValue, &quot;attributeValue&quot;);</span>
 
-<span class="fc" id="L61">        this.attributes.set(attributeName, attributeValue);</span>
-<span class="fc" id="L62">        return this;</span>
+<span class="fc" id="L45">        this.attributes.set(attributeName, attributeValue);</span>
+<span class="fc" id="L46">        return this;</span>
     }
 
     public XMLElement setAttribute(XMLAttribute attribute)
     {
-<span class="fc" id="L67">        PreCondition.assertNotNull(attribute, &quot;attribute&quot;);</span>
+<span class="fc" id="L51">        PreCondition.assertNotNull(attribute, &quot;attribute&quot;);</span>
 
-<span class="fc" id="L69">        return this.setAttribute(attribute.getName(), attribute.getValue());</span>
+<span class="fc" id="L53">        return this.setAttribute(attribute.getName(), attribute.getValue());</span>
     }
 
     public XMLElement setAttributes(Iterable&lt;XMLAttribute&gt; attributes)
     {
-<span class="fc" id="L74">        PreCondition.assertNotNull(attributes, &quot;attributes&quot;);</span>
+<span class="fc" id="L58">        PreCondition.assertNotNull(attributes, &quot;attributes&quot;);</span>
 
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (final XMLAttribute attribute : attributes)</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (final XMLAttribute attribute : attributes)</span>
         {
-<span class="fc" id="L78">            this.setAttribute(attribute);</span>
-<span class="fc" id="L79">        }</span>
-<span class="fc" id="L80">        return this;</span>
+<span class="fc" id="L62">            this.setAttribute(attribute);</span>
+<span class="fc" id="L63">        }</span>
+<span class="fc" id="L64">        return this;</span>
     }
 
     public Iterable&lt;XMLAttribute&gt; getAttributes()
     {
-<span class="nc" id="L85">        return this.attributes.map(XMLAttribute::create);</span>
+<span class="fc" id="L69">        return this.attributes.map(XMLAttribute::create);</span>
     }
 
     public Result&lt;String&gt; getAttributeValue(String attributeName)
     {
-<span class="nc" id="L90">        PreCondition.assertNotNullAndNotEmpty(attributeName, &quot;attributeName&quot;);</span>
+<span class="fc" id="L74">        PreCondition.assertNotNullAndNotEmpty(attributeName, &quot;attributeName&quot;);</span>
 
-<span class="nc" id="L92">        return this.attributes.get(attributeName)</span>
-<span class="nc" id="L93">            .convertError(NotFoundException.class, () -&gt; new NotFoundException(&quot;Couldn't find an attribute named &quot; + Strings.escapeAndQuote(attributeName) + &quot; in this start tag.&quot;));</span>
+<span class="fc" id="L76">        return this.attributes.get(attributeName)</span>
+<span class="fc" id="L77">            .convertError(NotFoundException.class, () -&gt; new NotFoundException(&quot;Couldn't find an attribute named &quot; + Strings.escapeAndQuote(attributeName) + &quot; in the element.&quot;));</span>
     }
 
     public Indexable&lt;XMLElementChild&gt; getChildren()
     {
-<span class="nc" id="L98">        return this.children;</span>
-    }
-
-    public XMLElement addChild(String textContent)
-    {
-<span class="nc" id="L103">        PreCondition.assertNotNull(textContent, &quot;textContent&quot;);</span>
-
-<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (!Strings.isNullOrEmpty(textContent))</span>
-        {
-<span class="nc" id="L107">            this.addChild(XMLText.create(textContent));</span>
-        }
-<span class="nc" id="L109">        return this;</span>
+<span class="fc" id="L82">        return this.children;</span>
     }
 
     public XMLElement addChild(XMLElementChild child)
     {
-<span class="fc" id="L114">        PreCondition.assertNotNull(child, &quot;child&quot;);</span>
+<span class="fc" id="L87">        PreCondition.assertNotNull(child, &quot;child&quot;);</span>
 
-<span class="fc" id="L116">        this.children.add(child);</span>
-<span class="fc" id="L117">        this.split = true;</span>
-<span class="fc" id="L118">        return this;</span>
+<span class="fc" id="L89">        this.children.add(child);</span>
+<span class="fc" id="L90">        this.split = true;</span>
+<span class="fc" id="L91">        return this;</span>
+    }
+
+    @Override
+    public String toString()
+    {
+<span class="fc" id="L97">        return XML.toString((Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt;)this::toString);</span>
+    }
+
+    public String toString(XMLFormat format)
+    {
+<span class="nc" id="L102">        return XML.toString(format, this::toString);</span>
     }
 
     @Override
     public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
-<span class="nc" id="L124">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
-<span class="nc" id="L125">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
-<span class="nc" id="L126">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+<span class="fc" id="L108">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L109">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L110">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
 
-<span class="nc" id="L128">        return Result.create(() -&gt;</span>
+<span class="fc" id="L112">        return Result.create(() -&gt;</span>
         {
-<span class="nc" id="L130">            int result = 0;</span>
+<span class="fc" id="L114">            int result = 0;</span>
 
-<span class="nc" id="L132">            result += stream.write('&lt;').await();</span>
-<span class="nc" id="L133">            result += stream.write(this.name).await();</span>
+<span class="fc" id="L116">            result += stream.write('&lt;').await();</span>
+<span class="fc" id="L117">            result += stream.write(this.name).await();</span>
 
-<span class="nc bnc" id="L135" title="All 2 branches missed.">            for (final MapEntry&lt;String,String&gt; attribute : this.attributes)</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">            for (final MapEntry&lt;String,String&gt; attribute : this.attributes)</span>
             {
-<span class="nc" id="L137">                result += stream.write(' ').await();</span>
-<span class="nc" id="L138">                result += stream.write(attribute.getKey()).await();</span>
-<span class="nc" id="L139">                result += stream.write(&quot; \&quot;&quot;).await();</span>
-<span class="nc" id="L140">                result += stream.write(attribute.getValue()).await();</span>
-<span class="nc" id="L141">                result += stream.write('\&quot;').await();</span>
-<span class="nc" id="L142">            }</span>
+<span class="fc" id="L121">                result += stream.write(' ').await();</span>
+<span class="fc" id="L122">                result += stream.write(attribute.getKey()).await();</span>
+<span class="fc" id="L123">                result += stream.write(&quot;=\&quot;&quot;).await();</span>
+<span class="fc" id="L124">                result += stream.write(attribute.getValue()).await();</span>
+<span class="fc" id="L125">                result += stream.write('\&quot;').await();</span>
+<span class="fc" id="L126">            }</span>
 
-<span class="nc bnc" id="L144" title="All 2 branches missed.">            if (!this.split)</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            if (!this.split)</span>
             {
-<span class="nc" id="L146">                result += stream.write(&quot;/&gt;&quot;).await();</span>
+<span class="fc" id="L130">                result += stream.write(&quot;/&gt;&quot;).await();</span>
             }
             else
             {
-<span class="nc" id="L150">                result += stream.write('&gt;').await();</span>
+<span class="fc" id="L134">                result += stream.write('&gt;').await();</span>
 
-<span class="nc bnc" id="L152" title="All 2 branches missed.">                for (final XMLElementChild child : this.children)</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                if (this.children.any())</span>
                 {
-<span class="nc" id="L154">                    result += child.toString(stream, format).await();</span>
-<span class="nc" id="L155">                }</span>
+<span class="fc" id="L138">                    stream.setSingleIndent(format.getSingleIndent());</span>
+<span class="fc" id="L139">                    final String newLine = format.getNewLine();</span>
 
-<span class="nc" id="L157">                result += stream.write(&quot;&lt;/&quot;).await();</span>
-<span class="nc" id="L158">                result += stream.write(this.name).await();</span>
-<span class="nc" id="L159">                result += stream.write('&gt;').await();</span>
+<span class="fc" id="L141">                    boolean previousChildWasText = false;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">                    for (final XMLElementChild child : this.children)</span>
+                    {
+<span class="fc bfc" id="L144" title="All 2 branches covered.">                        if (child instanceof XMLText)</span>
+                        {
+<span class="fc" id="L146">                            result += child.toString(stream, format).await();</span>
+<span class="fc" id="L147">                            previousChildWasText = true;</span>
+                        }
+                        else
+                        {
+<span class="fc" id="L151">                            stream.increaseIndent();</span>
+                            try
+                            {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                                if (!previousChildWasText)</span>
+                                {
+<span class="fc" id="L156">                                    result += stream.write(newLine).await();</span>
+                                }
+<span class="fc" id="L158">                                result += child.toString(stream, format).await();</span>
+                            }
+                            finally
+                            {
+<span class="fc" id="L162">                                stream.decreaseIndent();</span>
+                            }
+<span class="fc" id="L164">                            previousChildWasText = false;</span>
+                        }
+<span class="fc" id="L166">                    }</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                    if (!previousChildWasText)</span>
+                    {
+<span class="fc" id="L169">                        result += stream.write(newLine).await();</span>
+                    }
+                }
+
+<span class="fc" id="L173">                result += stream.write(&quot;&lt;/&quot;).await();</span>
+<span class="fc" id="L174">                result += stream.write(this.name).await();</span>
+<span class="fc" id="L175">                result += stream.write('&gt;').await();</span>
             }
 
-<span class="nc" id="L162">            return result;</span>
+<span class="fc" id="L178">            return result;</span>
         });
+    }
+
+    @Override
+    public boolean equals(Object rhs)
+    {
+<span class="pc bpc" id="L185" title="1 of 4 branches missed.">        return rhs instanceof XMLElement &amp;&amp; this.equals((XMLElement)rhs);</span>
+    }
+
+    public boolean equals(XMLElement rhs)
+    {
+<span class="pc bpc" id="L190" title="2 of 4 branches missed.">        return rhs != null &amp;&amp;</span>
+            this.split == rhs.split &amp;&amp;
+<span class="fc bfc" id="L192" title="All 2 branches covered.">            this.name.equals(rhs.name) &amp;&amp;</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">            this.attributes.equals(rhs.attributes) &amp;&amp;</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">            this.children.equals(rhs.children);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

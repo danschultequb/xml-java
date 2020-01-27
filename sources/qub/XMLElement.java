@@ -9,6 +9,8 @@ public class XMLElement implements XMLElementChild
 
     private XMLElement(String name, boolean split)
     {
+        PreCondition.assertNotNullAndNotEmpty(name, "name");
+
         this.name = name;
         this.attributes = Map.create();
         this.split = split;
@@ -17,30 +19,12 @@ public class XMLElement implements XMLElementChild
 
     public static XMLElement create(String name)
     {
-        PreCondition.assertNotNullAndNotEmpty(name, "name");
-
         return XMLElement.create(name, false);
     }
 
     public static XMLElement create(String name, boolean split)
     {
         return new XMLElement(name, split);
-    }
-
-    public static XMLElement create(String name, String textContent)
-    {
-        PreCondition.assertNotNullAndNotEmpty(name, "name");
-        PreCondition.assertNotNull(textContent, "textContent");
-
-        final XMLElement result = XMLElement.create(name, true);
-        if (!Strings.isNullOrEmpty(textContent))
-        {
-            result.addChild(XMLText.create(textContent));
-        }
-
-        PostCondition.assertNotNull(result, "result");
-
-        return result;
     }
 
     public String getName()
@@ -90,23 +74,12 @@ public class XMLElement implements XMLElementChild
         PreCondition.assertNotNullAndNotEmpty(attributeName, "attributeName");
 
         return this.attributes.get(attributeName)
-            .convertError(NotFoundException.class, () -> new NotFoundException("Couldn't find an attribute named " + Strings.escapeAndQuote(attributeName) + " in this start tag."));
+            .convertError(NotFoundException.class, () -> new NotFoundException("Couldn't find an attribute named " + Strings.escapeAndQuote(attributeName) + " in the element."));
     }
 
     public Indexable<XMLElementChild> getChildren()
     {
         return this.children;
-    }
-
-    public XMLElement addChild(String textContent)
-    {
-        PreCondition.assertNotNull(textContent, "textContent");
-
-        if (!Strings.isNullOrEmpty(textContent))
-        {
-            this.addChild(XMLText.create(textContent));
-        }
-        return this;
     }
 
     public XMLElement addChild(XMLElementChild child)
@@ -116,6 +89,17 @@ public class XMLElement implements XMLElementChild
         this.children.add(child);
         this.split = true;
         return this;
+    }
+
+    @Override
+    public String toString()
+    {
+        return XML.toString((Function2<IndentedCharacterWriteStream,XMLFormat,Result<Integer>>)this::toString);
+    }
+
+    public String toString(XMLFormat format)
+    {
+        return XML.toString(format, this::toString);
     }
 
     @Override
@@ -136,7 +120,7 @@ public class XMLElement implements XMLElementChild
             {
                 result += stream.write(' ').await();
                 result += stream.write(attribute.getKey()).await();
-                result += stream.write(" \"").await();
+                result += stream.write("=\"").await();
                 result += stream.write(attribute.getValue()).await();
                 result += stream.write('\"').await();
             }
@@ -149,9 +133,41 @@ public class XMLElement implements XMLElementChild
             {
                 result += stream.write('>').await();
 
-                for (final XMLElementChild child : this.children)
+                if (this.children.any())
                 {
-                    result += child.toString(stream, format).await();
+                    stream.setSingleIndent(format.getSingleIndent());
+                    final String newLine = format.getNewLine();
+
+                    boolean previousChildWasText = false;
+                    for (final XMLElementChild child : this.children)
+                    {
+                        if (child instanceof XMLText)
+                        {
+                            result += child.toString(stream, format).await();
+                            previousChildWasText = true;
+                        }
+                        else
+                        {
+                            stream.increaseIndent();
+                            try
+                            {
+                                if (!previousChildWasText)
+                                {
+                                    result += stream.write(newLine).await();
+                                }
+                                result += child.toString(stream, format).await();
+                            }
+                            finally
+                            {
+                                stream.decreaseIndent();
+                            }
+                            previousChildWasText = false;
+                        }
+                    }
+                    if (!previousChildWasText)
+                    {
+                        result += stream.write(newLine).await();
+                    }
                 }
 
                 result += stream.write("</").await();
@@ -161,5 +177,20 @@ public class XMLElement implements XMLElementChild
 
             return result;
         });
+    }
+
+    @Override
+    public boolean equals(Object rhs)
+    {
+        return rhs instanceof XMLElement && this.equals((XMLElement)rhs);
+    }
+
+    public boolean equals(XMLElement rhs)
+    {
+        return rhs != null &&
+            this.split == rhs.split &&
+            this.name.equals(rhs.name) &&
+            this.attributes.equals(rhs.attributes) &&
+            this.children.equals(rhs.children);
     }
 }

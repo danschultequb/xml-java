@@ -140,6 +140,81 @@ public interface XMLDeclarationTests
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             });
 
+            runner.testGroup("toString(XMLFormat)", () ->
+            {
+                final Action3<XMLDeclaration,XMLFormat,String> toStringTest = (XMLDeclaration declaration, XMLFormat format, String expected) ->
+                {
+                    runner.test("with " + declaration, (Test test) ->
+                    {
+                        test.assertEqual(expected, declaration.toString(format));
+                    });
+                };
+
+                toStringTest.run(
+                    XMLDeclaration.create(),
+                    XMLFormat.consise,
+                    "<?xml version=\"1.0\"?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("hello"),
+                    XMLFormat.consise,
+                    "<?xml version=\"hello\"?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("1.0"),
+                    XMLFormat.consise,
+                    "<?xml version=\"1.0\"?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setEncoding("UTF-8"),
+                    XMLFormat.consise,
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setStandalone("yes"),
+                    XMLFormat.consise,
+                    "<?xml version=\"1.0\" standalone=\"yes\"?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("1.0")
+                        .setEncoding("UTF-8")
+                        .setStandalone("yes"),
+                    XMLFormat.consise,
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+
+                toStringTest.run(
+                    XMLDeclaration.create(),
+                    XMLFormat.pretty,
+                    "<?xml version=\"1.0\" ?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("hello"),
+                    XMLFormat.pretty,
+                    "<?xml version=\"hello\" ?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("1.0"),
+                    XMLFormat.pretty,
+                    "<?xml version=\"1.0\" ?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setEncoding("UTF-8"),
+                    XMLFormat.pretty,
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setStandalone("yes"),
+                    XMLFormat.pretty,
+                    "<?xml version=\"1.0\" standalone=\"yes\" ?>");
+                toStringTest.run(
+                    XMLDeclaration.create()
+                        .setVersion("1.0")
+                        .setEncoding("UTF-8")
+                        .setStandalone("yes"),
+                    XMLFormat.pretty,
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
+            });
+
             runner.testGroup("equals(Object)", () ->
             {
                 final Action3<XMLDeclaration,Object,Boolean> equalsTest = (XMLDeclaration declaration, Object rhs, Boolean expected) ->

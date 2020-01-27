@@ -46,42 +46,55 @@ public class XMLDocument
     @Override
     public String toString()
     {
-<span class="fc" id="L49">        return XML.toString((Function2&lt;IndentedCharacterWriteStream, XMLFormat, Result&lt;Integer&gt;&gt;)this::toString);</span>
+<span class="fc" id="L49">        return XML.toString((Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt;)this::toString);</span>
+    }
+
+    public String toString(XMLFormat format)
+    {
+<span class="fc" id="L54">        return XML.toString(format, this::toString);</span>
     }
 
     public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
-<span class="fc" id="L54">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
-<span class="fc" id="L55">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+<span class="fc" id="L59">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L60">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
 
-<span class="fc" id="L57">        return Result.create(() -&gt;</span>
+<span class="fc" id="L62">        return Result.create(() -&gt;</span>
         {
-<span class="fc" id="L59">            int result = 0;</span>
+<span class="fc" id="L64">            int result = 0;</span>
 
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">            if (this.declaration != null)</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            final boolean hasRoot = this.root != null;</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            if (this.declaration != null)</span>
             {
-<span class="nc" id="L63">                result += this.declaration.toString(stream, format).await();</span>
+<span class="fc" id="L70">                result += this.declaration.toString(stream, format).await();</span>
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                if (hasRoot)</span>
+                {
+<span class="fc" id="L74">                    result += stream.write(format.getNewLine()).await();</span>
+                }
             }
 
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            if (this.root != null)</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            if (hasRoot)</span>
             {
-<span class="nc" id="L68">                result += this.root.toString(stream, format).await();</span>
+<span class="fc" id="L80">                result += this.root.toString(stream, format).await();</span>
             }
 
-<span class="fc" id="L71">            return result;</span>
+<span class="fc" id="L83">            return result;</span>
         });
     }
 
     @Override
     public boolean equals(Object rhs)
     {
-<span class="pc bpc" id="L78" title="1 of 4 branches missed.">        return rhs instanceof XMLDocument &amp;&amp; this.equals((XMLDocument)rhs);</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">        return rhs instanceof XMLDocument &amp;&amp; this.equals((XMLDocument)rhs);</span>
     }
 
     public boolean equals(XMLDocument rhs)
     {
-<span class="fc bfc" id="L83" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            Comparer.equal(this.declaration, rhs.declaration);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            Comparer.equal(this.declaration, rhs.declaration) &amp;&amp;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            Comparer.equal(this.root, rhs.root);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

@@ -5,18 +5,23 @@
  */
 public class XMLFormat
 {
-<span class="fc" id="L8">    public static final XMLFormat consise = XMLFormat.create()</span>
-<span class="fc" id="L9">        .setSpaceBeforeDeclarationEnd(&quot;&quot;);</span>
+<span class="fc" id="L8">    public static final XMLFormat consise = XMLFormat.create();</span>
 
-<span class="fc" id="L11">    public static final XMLFormat pretty = XMLFormat.create()</span>
-<span class="fc" id="L12">        .setSpaceBeforeDeclarationEnd(&quot; &quot;);</span>
+<span class="fc" id="L10">    public static final XMLFormat pretty = XMLFormat.create()</span>
+<span class="fc" id="L11">        .setSpaceBeforeDeclarationEnd(&quot; &quot;)</span>
+<span class="fc" id="L12">        .setNewLine(&quot;\n&quot;)</span>
+<span class="fc" id="L13">        .setSingleIndent(&quot;  &quot;);</span>
 
     private String spaceBeforeDeclarationEnd;
+    private String newLine;
+    private String singleIndent;
 
     private XMLFormat()
-<span class="fc" id="L17">    {</span>
-<span class="fc" id="L18">        spaceBeforeDeclarationEnd = &quot;&quot;;</span>
-<span class="fc" id="L19">    }</span>
+<span class="fc" id="L20">    {</span>
+<span class="fc" id="L21">        this.spaceBeforeDeclarationEnd = &quot;&quot;;</span>
+<span class="fc" id="L22">        this.newLine = &quot;&quot;;</span>
+<span class="fc" id="L23">        this.singleIndent = &quot;&quot;;</span>
+<span class="fc" id="L24">    }</span>
 
     /**
      * Create a new XMLFormat object.
@@ -24,7 +29,7 @@ public class XMLFormat
      */
     public static XMLFormat create()
     {
-<span class="fc" id="L27">        return new XMLFormat();</span>
+<span class="fc" id="L32">        return new XMLFormat();</span>
     }
 
     /**
@@ -34,11 +39,11 @@ public class XMLFormat
      */
     public XMLFormat setSpaceBeforeDeclarationEnd(String spaceBeforeDeclarationEnd)
     {
-<span class="fc" id="L37">        PreCondition.assertNotNull(spaceBeforeDeclarationEnd, &quot;spaceBeforeDeclarationEnd&quot;);</span>
-<span class="fc" id="L38">        PreCondition.assertContainsOnly(spaceBeforeDeclarationEnd, XML.whitespaceCharacters, &quot;spaceBeforeDeclarationEnd&quot;);</span>
+<span class="fc" id="L42">        PreCondition.assertNotNull(spaceBeforeDeclarationEnd, &quot;spaceBeforeDeclarationEnd&quot;);</span>
+<span class="fc" id="L43">        PreCondition.assertContainsOnly(spaceBeforeDeclarationEnd, XML.whitespaceCharacters, &quot;spaceBeforeDeclarationEnd&quot;);</span>
 
-<span class="fc" id="L40">        this.spaceBeforeDeclarationEnd = spaceBeforeDeclarationEnd;</span>
-<span class="fc" id="L41">        return this;</span>
+<span class="fc" id="L45">        this.spaceBeforeDeclarationEnd = spaceBeforeDeclarationEnd;</span>
+<span class="fc" id="L46">        return this;</span>
     }
 
     /**
@@ -47,7 +52,35 @@ public class XMLFormat
      */
     public String getSpaceBeforeDeclarationEnd()
     {
-<span class="fc" id="L50">        return this.spaceBeforeDeclarationEnd;</span>
+<span class="fc" id="L55">        return this.spaceBeforeDeclarationEnd;</span>
+    }
+
+    public XMLFormat setNewLine(String newLine)
+    {
+<span class="fc" id="L60">        PreCondition.assertNotNull(newLine, &quot;newLine&quot;);</span>
+<span class="fc" id="L61">        PreCondition.assertContainsOnly(newLine, XML.whitespaceCharacters, &quot;newLine&quot;);</span>
+
+<span class="fc" id="L63">        this.newLine = newLine;</span>
+<span class="fc" id="L64">        return this;</span>
+    }
+
+    public String getNewLine()
+    {
+<span class="fc" id="L69">        return this.newLine;</span>
+    }
+
+    public XMLFormat setSingleIndent(String singleIndent)
+    {
+<span class="fc" id="L74">        PreCondition.assertNotNull(singleIndent, &quot;singleIndent&quot;);</span>
+<span class="fc" id="L75">        PreCondition.assertContainsOnly(singleIndent, XML.whitespaceCharacters, &quot;singleIndent&quot;);</span>
+
+<span class="fc" id="L77">        this.singleIndent = singleIndent;</span>
+<span class="fc" id="L78">        return this;</span>
+    }
+
+    public String getSingleIndent()
+    {
+<span class="fc" id="L83">        return this.singleIndent;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

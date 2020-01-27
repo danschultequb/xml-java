@@ -34,6 +34,43 @@ public interface XMLCDataTests
                 createTest.run(" a ");
             });
 
+            runner.testGroup("toString()", () ->
+            {
+                final Action2<String,String> toStringTest = (String cdataText, String expected) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(cdataText), (Test test) ->
+                    {
+                        test.assertEqual(expected, XMLCData.create(cdataText).toString());
+                    });
+                };
+
+                toStringTest.run("", "<![CDATA[]]>");
+                toStringTest.run("   ", "<![CDATA[   ]]>");
+                toStringTest.run("abc", "<![CDATA[abc]]>");
+                toStringTest.run(" abc ", "<![CDATA[ abc ]]>");
+            });
+
+            runner.testGroup("toString(XMLFormat)", () ->
+            {
+                final Action3<String,XMLFormat,String> toStringTest = (String cdataText, XMLFormat format, String expected) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(cdataText), (Test test) ->
+                    {
+                        test.assertEqual(expected, XMLCData.create(cdataText).toString(format));
+                    });
+                };
+
+                toStringTest.run("", XMLFormat.consise, "<![CDATA[]]>");
+                toStringTest.run("   ", XMLFormat.consise, "<![CDATA[   ]]>");
+                toStringTest.run("abc", XMLFormat.consise, "<![CDATA[abc]]>");
+                toStringTest.run(" abc ", XMLFormat.consise, "<![CDATA[ abc ]]>");
+
+                toStringTest.run("", XMLFormat.pretty, "<![CDATA[]]>");
+                toStringTest.run("   ", XMLFormat.pretty, "<![CDATA[   ]]>");
+                toStringTest.run("abc", XMLFormat.pretty, "<![CDATA[abc]]>");
+                toStringTest.run(" abc ", XMLFormat.pretty, "<![CDATA[ abc ]]>");
+            });
+
             runner.testGroup("equals(Object)", () ->
             {
                 final Action3<XMLCData,Object,Boolean> equalsTest = (XMLCData cdata, Object rhs, Boolean expected) ->

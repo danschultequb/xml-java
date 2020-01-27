@@ -33,9 +33,9 @@ public class XMLAttribute
 
     public static XMLAttribute create(MapEntry&lt;String,String&gt; attribute)
     {
-<span class="nc" id="L36">        PreCondition.assertNotNull(attribute, &quot;attribute&quot;);</span>
+<span class="fc" id="L36">        PreCondition.assertNotNull(attribute, &quot;attribute&quot;);</span>
 
-<span class="nc" id="L38">        return XMLAttribute.create(attribute.getKey(), attribute.getValue());</span>
+<span class="fc" id="L38">        return XMLAttribute.create(attribute.getKey(), attribute.getValue());</span>
     }
 
     public static XMLAttribute create(String name, String value)
@@ -78,62 +78,67 @@ public class XMLAttribute
     @Override
     public String toString()
     {
-<span class="fc" id="L81">        return XML.toString(this::toString);</span>
+<span class="fc" id="L81">        return XML.toString((Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt;)this::toString);</span>
+    }
+
+    public String toString(XMLFormat format)
+    {
+<span class="fc" id="L86">        return XML.toString(format, this::toString);</span>
     }
 
     public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
-<span class="fc" id="L86">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
-<span class="fc" id="L87">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
-<span class="fc" id="L88">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+<span class="fc" id="L91">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L92">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L93">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
 
-<span class="fc" id="L90">        return Result.create(() -&gt;</span>
+<span class="fc" id="L95">        return Result.create(() -&gt;</span>
         {
-<span class="fc" id="L92">            int result = 0;</span>
+<span class="fc" id="L97">            int result = 0;</span>
 
-<span class="fc" id="L94">            result += stream.write(this.name).await();</span>
-<span class="fc" id="L95">            result += stream.write('=').await();</span>
-<span class="fc" id="L96">            result += stream.write(this.valueQuoteCharacter).await();</span>
+<span class="fc" id="L99">            result += stream.write(this.name).await();</span>
+<span class="fc" id="L100">            result += stream.write('=').await();</span>
+<span class="fc" id="L101">            result += stream.write(this.valueQuoteCharacter).await();</span>
 
-<span class="fc" id="L98">            final int valueLength = this.value.length();</span>
-<span class="fc" id="L99">            int startIndex = 0;</span>
-<span class="fc" id="L100">            int quoteIndex = this.value.indexOf(this.valueQuoteCharacter);</span>
-<span class="fc bfc" id="L101" title="All 2 branches covered.">            while (startIndex &lt; valueLength)</span>
+<span class="fc" id="L103">            final int valueLength = this.value.length();</span>
+<span class="fc" id="L104">            int startIndex = 0;</span>
+<span class="fc" id="L105">            int quoteIndex = this.value.indexOf(this.valueQuoteCharacter);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            while (startIndex &lt; valueLength)</span>
             {
-<span class="fc bfc" id="L103" title="All 2 branches covered.">                if (quoteIndex == -1)</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">                if (quoteIndex == -1)</span>
                 {
-<span class="fc" id="L105">                    result += stream.write(this.value.substring(startIndex)).await();</span>
-<span class="fc" id="L106">                    startIndex = valueLength;</span>
+<span class="fc" id="L110">                    result += stream.write(this.value.substring(startIndex)).await();</span>
+<span class="fc" id="L111">                    startIndex = valueLength;</span>
                 }
                 else
                 {
-<span class="fc" id="L110">                    result += stream.write(this.value.substring(startIndex, quoteIndex)).await();</span>
-<span class="fc" id="L111">                    result += stream.write(&quot;&amp;#x&quot;).await();</span>
-<span class="fc" id="L112">                    result += stream.write(Integers.toHexString(this.valueQuoteCharacter, true)).await();</span>
-<span class="fc" id="L113">                    result += stream.write(';').await();</span>
+<span class="fc" id="L115">                    result += stream.write(this.value.substring(startIndex, quoteIndex)).await();</span>
+<span class="fc" id="L116">                    result += stream.write(&quot;&amp;#x&quot;).await();</span>
+<span class="fc" id="L117">                    result += stream.write(Integers.toHexString(this.valueQuoteCharacter, true)).await();</span>
+<span class="fc" id="L118">                    result += stream.write(';').await();</span>
 
-<span class="fc" id="L115">                    startIndex = quoteIndex + 1;</span>
-<span class="fc" id="L116">                    quoteIndex = this.value.indexOf(this.valueQuoteCharacter, startIndex);</span>
+<span class="fc" id="L120">                    startIndex = quoteIndex + 1;</span>
+<span class="fc" id="L121">                    quoteIndex = this.value.indexOf(this.valueQuoteCharacter, startIndex);</span>
                 }
             }
 
-<span class="fc" id="L120">            result += stream.write(this.valueQuoteCharacter).await();</span>
+<span class="fc" id="L125">            result += stream.write(this.valueQuoteCharacter).await();</span>
 
-<span class="fc" id="L122">            return result;</span>
+<span class="fc" id="L127">            return result;</span>
         });
     }
 
     @Override
     public boolean equals(Object rhs)
     {
-<span class="fc bfc" id="L129" title="All 4 branches covered.">        return rhs instanceof XMLAttribute &amp;&amp; this.equals((XMLAttribute)rhs);</span>
+<span class="fc bfc" id="L134" title="All 4 branches covered.">        return rhs instanceof XMLAttribute &amp;&amp; this.equals((XMLAttribute)rhs);</span>
     }
 
     public boolean equals(XMLAttribute rhs)
     {
-<span class="fc bfc" id="L134" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
-<span class="fc bfc" id="L135" title="All 2 branches covered.">            this.name.equals(rhs.name) &amp;&amp;</span>
-<span class="fc bfc" id="L136" title="All 4 branches covered.">            this.value.equals(rhs.value) &amp;&amp;</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            this.name.equals(rhs.name) &amp;&amp;</span>
+<span class="fc bfc" id="L141" title="All 4 branches covered.">            this.value.equals(rhs.value) &amp;&amp;</span>
             this.valueQuoteCharacter == rhs.valueQuoteCharacter;
     }
 }

@@ -5,17 +5,22 @@ package qub;
  */
 public class XMLFormat
 {
-    public static final XMLFormat consise = XMLFormat.create()
-        .setSpaceBeforeDeclarationEnd("");
+    public static final XMLFormat consise = XMLFormat.create();
 
     public static final XMLFormat pretty = XMLFormat.create()
-        .setSpaceBeforeDeclarationEnd(" ");
+        .setSpaceBeforeDeclarationEnd(" ")
+        .setNewLine("\n")
+        .setSingleIndent("  ");
 
     private String spaceBeforeDeclarationEnd;
+    private String newLine;
+    private String singleIndent;
 
     private XMLFormat()
     {
-        spaceBeforeDeclarationEnd = "";
+        this.spaceBeforeDeclarationEnd = "";
+        this.newLine = "";
+        this.singleIndent = "";
     }
 
     /**
@@ -48,5 +53,33 @@ public class XMLFormat
     public String getSpaceBeforeDeclarationEnd()
     {
         return this.spaceBeforeDeclarationEnd;
+    }
+
+    public XMLFormat setNewLine(String newLine)
+    {
+        PreCondition.assertNotNull(newLine, "newLine");
+        PreCondition.assertContainsOnly(newLine, XML.whitespaceCharacters, "newLine");
+
+        this.newLine = newLine;
+        return this;
+    }
+
+    public String getNewLine()
+    {
+        return this.newLine;
+    }
+
+    public XMLFormat setSingleIndent(String singleIndent)
+    {
+        PreCondition.assertNotNull(singleIndent, "singleIndent");
+        PreCondition.assertContainsOnly(singleIndent, XML.whitespaceCharacters, "singleIndent");
+
+        this.singleIndent = singleIndent;
+        return this;
+    }
+
+    public String getSingleIndent()
+    {
+        return this.singleIndent;
     }
 }

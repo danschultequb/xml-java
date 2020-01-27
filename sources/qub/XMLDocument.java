@@ -46,7 +46,12 @@ public class XMLDocument
     @Override
     public String toString()
     {
-        return XML.toString((Function2<IndentedCharacterWriteStream, XMLFormat, Result<Integer>>)this::toString);
+        return XML.toString((Function2<IndentedCharacterWriteStream,XMLFormat,Result<Integer>>)this::toString);
+    }
+
+    public String toString(XMLFormat format)
+    {
+        return XML.toString(format, this::toString);
     }
 
     public Result<Integer> toString(IndentedCharacterWriteStream stream, XMLFormat format)
@@ -58,12 +63,19 @@ public class XMLDocument
         {
             int result = 0;
 
+            final boolean hasRoot = this.root != null;
+
             if (this.declaration != null)
             {
                 result += this.declaration.toString(stream, format).await();
+
+                if (hasRoot)
+                {
+                    result += stream.write(format.getNewLine()).await();
+                }
             }
 
-            if (this.root != null)
+            if (hasRoot)
             {
                 result += this.root.toString(stream, format).await();
             }
@@ -81,6 +93,7 @@ public class XMLDocument
     public boolean equals(XMLDocument rhs)
     {
         return rhs != null &&
-            Comparer.equal(this.declaration, rhs.declaration);
+            Comparer.equal(this.declaration, rhs.declaration) &&
+            Comparer.equal(this.root, rhs.root);
     }
 }

@@ -34,6 +34,43 @@ public interface XMLCommentTests
                 createTest.run(" a ");
             });
 
+            runner.testGroup("toString()", () ->
+            {
+                final Action2<String,String> toStringTest = (String commentText, String expected) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(commentText), (Test test) ->
+                    {
+                        test.assertEqual(expected, XMLComment.create(commentText).toString());
+                    });
+                };
+
+                toStringTest.run("", "<!---->");
+                toStringTest.run("   ", "<!--   -->");
+                toStringTest.run("abc", "<!--abc-->");
+                toStringTest.run(" abc ", "<!-- abc -->");
+            });
+
+            runner.testGroup("toString(XMLFormat)", () ->
+            {
+                final Action3<String,XMLFormat,String> toStringTest = (String commentText, XMLFormat format, String expected) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(commentText), (Test test) ->
+                    {
+                        test.assertEqual(expected, XMLComment.create(commentText).toString(format));
+                    });
+                };
+
+                toStringTest.run("", XMLFormat.consise, "<!---->");
+                toStringTest.run("   ", XMLFormat.consise, "<!--   -->");
+                toStringTest.run("abc", XMLFormat.consise, "<!--abc-->");
+                toStringTest.run(" abc ", XMLFormat.consise, "<!-- abc -->");
+
+                toStringTest.run("", XMLFormat.pretty, "<!---->");
+                toStringTest.run("   ", XMLFormat.pretty, "<!--   -->");
+                toStringTest.run("abc", XMLFormat.pretty, "<!--abc-->");
+                toStringTest.run(" abc ", XMLFormat.pretty, "<!-- abc -->");
+            });
+
             runner.testGroup("equals(Object)", () ->
             {
                 final Action3<XMLComment,Object,Boolean> equalsTest = (XMLComment comment, Object rhs, Boolean expected) ->

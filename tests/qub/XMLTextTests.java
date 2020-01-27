@@ -39,6 +39,42 @@ public interface XMLTextTests
                 createTest.run(" a ");
             });
 
+
+
+            runner.testGroup("toString()", () ->
+            {
+                final Action1<String> toStringTest = (String text) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(text), (Test test) ->
+                    {
+                        test.assertEqual(text, XMLText.create(text).toString());
+                    });
+                };
+
+                toStringTest.run("   ");
+                toStringTest.run("abc");
+                toStringTest.run(" abc ");
+            });
+
+            runner.testGroup("toString(XMLFormat)", () ->
+            {
+                final Action2<String,XMLFormat> toStringTest = (String text, XMLFormat format) ->
+                {
+                    runner.test("with " + Strings.escapeAndQuote(text), (Test test) ->
+                    {
+                        test.assertEqual(text, XMLText.create(text).toString(format));
+                    });
+                };
+
+                toStringTest.run("   ", XMLFormat.consise);
+                toStringTest.run("abc", XMLFormat.consise);
+                toStringTest.run(" abc ", XMLFormat.consise);
+
+                toStringTest.run("   ", XMLFormat.pretty);
+                toStringTest.run("abc", XMLFormat.pretty);
+                toStringTest.run(" abc ", XMLFormat.pretty);
+            });
+
             runner.testGroup("equals(Object)", () ->
             {
                 final Action3<XMLText,Object,Boolean> equalsTest = (XMLText xmlText, Object rhs, Boolean expected) ->

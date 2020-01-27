@@ -26,7 +26,12 @@ public class XMLComment implements XMLElementChild
     @Override
     public String toString()
     {
-        return XML.toString(this::toString);
+        return XML.toString((Function2<IndentedCharacterWriteStream,XMLFormat,Result<Integer>>)this::toString);
+    }
+
+    public String toString(XMLFormat format)
+    {
+        return XML.toString(format, this::toString);
     }
 
     public Result<Integer> toString(IndentedCharacterWriteStream stream, XMLFormat format)

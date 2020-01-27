@@ -38,6 +38,37 @@ public interface XMLAttributeTests
                 createWithQuotedValueTest.run("a", "\"b\"", "b", '\"');
             });
 
+            runner.testGroup("create(MapEntry<String,String>)", () ->
+            {
+                final Action2<MapEntry<String,String>,Throwable> createErrorTest = (MapEntry<String,String> entry, Throwable expected) ->
+                {
+                    runner.test("with " + entry, (Test test) ->
+                    {
+                        test.assertThrows(() -> XMLAttribute.create(entry), expected);
+                    });
+                };
+
+                createErrorTest.run(null, new PreConditionFailure("attribute cannot be null."));
+                createErrorTest.run(MapEntry.create(null, "hello"), new PreConditionFailure("name cannot be null."));
+                createErrorTest.run(MapEntry.create("", "hello"), new PreConditionFailure("name cannot be empty."));
+                createErrorTest.run(MapEntry.create("a", null), new PreConditionFailure("value cannot be null."));
+
+                final Action1<MapEntry<String,String>> createTest = (MapEntry<String,String> entry) ->
+                {
+                    runner.test("with " + entry, (Test test) ->
+                    {
+                        final XMLAttribute attribute = XMLAttribute.create(entry);
+                        test.assertNotNull(attribute);
+                        test.assertEqual(entry.getKey(), attribute.getName());
+                        test.assertEqual(entry.getValue(), attribute.getValue());
+                        test.assertEqual('\"', attribute.getValueQuoteCharacter());
+                    });
+                };
+
+                createTest.run(MapEntry.create("a", ""));
+                createTest.run(MapEntry.create("a", "b"));
+            });
+
             runner.testGroup("create(String,String)", () ->
             {
                 final Action3<String,String,Throwable> createErrorTest = (String name, String value, Throwable expected) ->
@@ -123,6 +154,31 @@ public interface XMLAttributeTests
                 toStringTest.run(XMLAttribute.create("a", "<"), "a=\"<\"");
                 toStringTest.run(XMLAttribute.create("a", "'", '\''), "a='&#x27;'");
                 toStringTest.run(XMLAttribute.create("a", "apples", '\''), "a='apples'");
+            });
+
+            runner.testGroup("toString(XMLFormat)", () ->
+            {
+                final Action3<XMLAttribute,XMLFormat,String> toStringTest = (XMLAttribute attribute, XMLFormat format, String expected) ->
+                {
+                    runner.test("with " + attribute, (Test test) ->
+                    {
+                        test.assertEqual(expected, attribute.toString(format));
+                    });
+                };
+
+                toStringTest.run(XMLAttribute.create("a", "b"), XMLFormat.consise, "a=\"b\"");
+                toStringTest.run(XMLAttribute.create("a", "\""), XMLFormat.consise, "a=\"&#x22;\"");
+                toStringTest.run(XMLAttribute.create("a", "'"), XMLFormat.consise, "a=\"'\"");
+                toStringTest.run(XMLAttribute.create("a", "<"), XMLFormat.consise, "a=\"<\"");
+                toStringTest.run(XMLAttribute.create("a", "'", '\''), XMLFormat.consise, "a='&#x27;'");
+                toStringTest.run(XMLAttribute.create("a", "apples", '\''), XMLFormat.consise, "a='apples'");
+
+                toStringTest.run(XMLAttribute.create("a", "b"), XMLFormat.pretty, "a=\"b\"");
+                toStringTest.run(XMLAttribute.create("a", "\""), XMLFormat.pretty, "a=\"&#x22;\"");
+                toStringTest.run(XMLAttribute.create("a", "'"), XMLFormat.pretty, "a=\"'\"");
+                toStringTest.run(XMLAttribute.create("a", "<"), XMLFormat.pretty, "a=\"<\"");
+                toStringTest.run(XMLAttribute.create("a", "'", '\''), XMLFormat.pretty, "a='&#x27;'");
+                toStringTest.run(XMLAttribute.create("a", "apples", '\''), XMLFormat.pretty, "a='apples'");
             });
 
             runner.testGroup("equals(Object)", () ->

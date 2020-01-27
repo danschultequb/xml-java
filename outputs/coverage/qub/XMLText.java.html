@@ -40,46 +40,51 @@ public class XMLText implements XMLElementChild
     @Override
     public String toString()
     {
-<span class="fc" id="L43">        return XML.toString(this::toString);</span>
+<span class="fc" id="L43">        return XML.toString((Function2&lt;IndentedCharacterWriteStream,XMLFormat,Result&lt;Integer&gt;&gt;)this::toString);</span>
+    }
+
+    public String toString(XMLFormat format)
+    {
+<span class="fc" id="L48">        return XML.toString(format, this::toString);</span>
     }
 
     @Override
     public Result&lt;Integer&gt; toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
-<span class="fc" id="L49">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
-<span class="fc" id="L50">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
-<span class="fc" id="L51">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
+<span class="fc" id="L54">        PreCondition.assertNotNull(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L55">        PreCondition.assertNotDisposed(stream, &quot;stream&quot;);</span>
+<span class="fc" id="L56">        PreCondition.assertNotNull(format, &quot;format&quot;);</span>
 
-<span class="fc" id="L53">        return stream.write(this.text);</span>
+<span class="fc" id="L58">        return stream.write(this.text);</span>
     }
 
     @Override
     public boolean equals(Object rhs)
     {
-<span class="fc bfc" id="L59" title="All 4 branches covered.">        return rhs instanceof XMLText &amp;&amp; this.equals((XMLText)rhs);</span>
+<span class="fc bfc" id="L64" title="All 4 branches covered.">        return rhs instanceof XMLText &amp;&amp; this.equals((XMLText)rhs);</span>
     }
 
     public boolean equals(XMLText rhs)
     {
-<span class="fc bfc" id="L64" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">            this.text.equals(rhs.text);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        return rhs != null &amp;&amp;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            this.text.equals(rhs.text);</span>
     }
 
     public static boolean isWhitespace(String text)
     {
-<span class="fc" id="L70">        PreCondition.assertNotNull(text, &quot;text&quot;);</span>
+<span class="fc" id="L75">        PreCondition.assertNotNull(text, &quot;text&quot;);</span>
 
-<span class="fc" id="L72">        boolean result = true;</span>
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        for (final char c : text.toCharArray())</span>
+<span class="fc" id="L77">        boolean result = true;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (final char c : text.toCharArray())</span>
         {
-<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (!Characters.isWhitespace(c))</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            if (!Characters.isWhitespace(c))</span>
             {
-<span class="fc" id="L77">                result = false;</span>
-<span class="fc" id="L78">                break;</span>
+<span class="fc" id="L82">                result = false;</span>
+<span class="fc" id="L83">                break;</span>
             }
         }
 
-<span class="fc" id="L82">        return result;</span>
+<span class="fc" id="L87">        return result;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>
