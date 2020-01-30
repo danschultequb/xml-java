@@ -77,9 +77,77 @@ public class XMLElement implements XMLElementChild
             .convertError(NotFoundException.class, () -> new NotFoundException("Couldn't find an attribute named " + Strings.escapeAndQuote(attributeName) + " in the element."));
     }
 
+    /**
+     * Remove all of the attributes from this XMLElement.
+     * @return This object for method chaining.
+     */
+    public XMLElement clearAttributes()
+    {
+        this.attributes.clear();
+        return this;
+    }
+
+    /**
+     * Remove the attribute with the provided name from this XMLElement.
+     * @param attributeName The name of the attribute to remove.
+     * @return The removed attribute.
+     */
+    public Result<XMLAttribute> removeAttribute(String attributeName)
+    {
+        PreCondition.assertNotNullAndNotEmpty(attributeName, "attributeName");
+
+        return Result.create(() ->
+        {
+            final String removedAttributeValue = this.attributes.remove(attributeName)
+                .convertError(NotFoundException.class, () -> new NotFoundException("No attribute with the name " + Strings.escapeAndQuote(attributeName) + " was found in this XMLElement."))
+                .await();
+            return XMLAttribute.create(attributeName, removedAttributeValue);
+        });
+    }
+
+    /**
+     * Get the children of this XMLElement.
+     * @return The children of this XMLElement.
+     */
     public Indexable<XMLElementChild> getChildren()
     {
         return this.children;
+    }
+
+    /**
+     * Get the children of this XMLElement that are XMLElements.
+     * @return The children of this XMLElement that are XMLElements.
+     */
+    public Iterable<XMLElement> getElementChildren()
+    {
+        return this.getChildren().instanceOf(XMLElement.class);
+    }
+
+    /**
+     * Get the children of this XMLElement that are XMLElements and have the provided name.
+     * @param name The name of the XMLElement children to return.
+     * @return The children of this XMLElement that are XMLElements and have the provided name.
+     */
+    public Iterable<XMLElement> getElementChildren(String name)
+    {
+        PreCondition.assertNotNullAndNotEmpty(name, "name");
+
+        return this.getElementChildren((XMLElement child) -> child.getName().equals(name));
+    }
+
+    /**
+     * Get the children of this XMLElement that are XMLElements and that satisfy the provided
+     * condition.
+     * @param condition The condition that the XMLElement children must satisfy.
+     * @return The children of this XMLElement that are XMLElements and that satisfy the provided
+     * condition.
+     */
+    public Iterable<XMLElement> getElementChildren(Function1<XMLElement,Boolean> condition)
+    {
+        PreCondition.assertNotNull(condition, "condition");
+
+        return this.getElementChildren()
+            .where(condition);
     }
 
     public XMLElement addChild(XMLElementChild child)
@@ -89,6 +157,34 @@ public class XMLElement implements XMLElementChild
         this.children.add(child);
         this.split = true;
         return this;
+    }
+
+    /**
+     * Remove all of the children of this XMLElement.
+     * @return This object for method chaining.
+     */
+    public XMLElement clearChildren()
+    {
+        this.children.clear();
+        return this;
+    }
+
+    /**
+     * Remove the provided child from this XMLElement.
+     * @param child The child to remove from this XMLElement.
+     * @return The result of removing the child.
+     */
+    public Result<Void> removeChild(XMLElementChild child)
+    {
+        PreCondition.assertNotNull(child, "child");
+
+        return Result.create(() ->
+        {
+            if (!this.children.remove(child))
+            {
+                throw new NotFoundException("Could not remove the child " + child + " because it didn't exist.");
+            }
+        });
     }
 
     @Override

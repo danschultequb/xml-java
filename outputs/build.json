@@ -67,7 +67,7 @@
     ]
   },
   "sources/qub/XMLElement.java": {
-    "lastModified": "2020-01-27T02:22:08.799132108Z",
+    "lastModified": "2020-01-30T15:54:15.850717067Z",
     "dependencies": [
       "sources/qub/XML.java",
       "sources/qub/XMLAttribute.java",
@@ -135,10 +135,11 @@
     ]
   },
   "tests/qub/XMLElementTests.java": {
-    "lastModified": "2020-01-27T02:25:20.136841058Z",
+    "lastModified": "2020-01-30T15:55:51.473993062Z",
     "dependencies": [
       "sources/qub/XMLAttribute.java",
       "sources/qub/XMLElement.java",
+      "sources/qub/XMLElementChild.java",
       "sources/qub/XMLFormat.java",
       "sources/qub/XMLText.java"
     ]
