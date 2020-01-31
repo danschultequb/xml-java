@@ -337,6 +337,95 @@ public interface XMLElementTests
                             .setAttribute("yummy", "yes")));
             });
 
+            runner.testGroup("addChild(XMLElementChild)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.addChild(null),
+                        new PreConditionFailure("child cannot be null."));
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with non-null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildResult = element.addChild(XMLText.create("hello"));
+                    test.assertSame(element, addChildResult);
+                    test.assertEqual(Iterable.create(XMLText.create("hello")), element.getChildren());
+                });
+            });
+
+            runner.testGroup("addChildren(Iterable<XMLElementChild>)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.addChildren((Iterable<XMLElementChild>)null),
+                        new PreConditionFailure("children cannot be null."));
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with empty", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren(Iterable.create());
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with non-empty", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren(Iterable.create(XMLText.create("hello"), XMLElement.create("buddy")));
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(XMLText.create("hello"), XMLElement.create("buddy")), element.getChildren());
+                });
+            });
+
+            runner.testGroup("addChildren(XMLElementChild...)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.addChildren((XMLElementChild[])null),
+                        new PreConditionFailure("children cannot be null."));
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with no arguments", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren();
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with empty array", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren(new XMLElementChild[0]);
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with non-empty array", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren(new XMLElementChild[] { XMLText.create("hello"), XMLElement.create("buddy") });
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(XMLText.create("hello"), XMLElement.create("buddy")), element.getChildren());
+                });
+
+                runner.test("with non-empty arguments", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    final XMLElement addChildrenResult = element.addChildren(XMLText.create("hello"), XMLElement.create("buddy"));
+                    test.assertSame(element, addChildrenResult);
+                    test.assertEqual(Iterable.create(XMLText.create("hello"), XMLElement.create("buddy")), element.getChildren());
+                });
+            });
+
             runner.testGroup("clearChildren()", () ->
             {
                 final Action1<XMLElement> clearChildrenTest = (XMLElement element) ->
@@ -392,6 +481,128 @@ public interface XMLElementTests
 
                     test.assertNull(element.removeChild(XMLElement.create("b")).await());
                     test.assertEqual(Iterable.create(), element.getChildren());
+                });
+            });
+
+            runner.testGroup("removeElementChildren(String)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.removeElementChildren((String)null),
+                        new PreConditionFailure("childElementName cannot be null."));
+                });
+
+                runner.test("with empty", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.removeElementChildren(""),
+                        new PreConditionFailure("childElementName cannot be empty."));
+                });
+
+                runner.test("with not found child element name", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.removeElementChildren("b").await(),
+                        new NotFoundException("No child element found with the name \"b\"."));
+                });
+
+                runner.test("with one matching child element", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChild(XMLElement.create("b"));
+                    test.assertEqual(Iterable.create(XMLElement.create("b")), element.removeElementChildren("b").await());
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with multiple matching child element", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChildren(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d"),
+                            XMLElement.create("b")
+                                .setAttribute("e", "f"));
+                    test.assertEqual(
+                        Iterable.create(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d"),
+                            XMLElement.create("b")
+                                .setAttribute("e", "f")),
+                        element.removeElementChildren("b").await());
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+            });
+
+            runner.testGroup("removeElementChildren(Function1<XMLElement,Boolean>)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.removeElementChildren((Function1<XMLElement,Boolean>)null),
+                        new PreConditionFailure("condition cannot be null."));
+                });
+
+                runner.test("with no matching child elements", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.removeElementChildren((XMLElement e) -> e.getName().equals("b")).await(),
+                        new NotFoundException("No child element found that matched the provided condition."));
+                });
+
+                runner.test("with one matching child element", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChild(XMLElement.create("b"));
+                    test.assertEqual(Iterable.create(XMLElement.create("b")), element.removeElementChildren((XMLElement e) -> e.getName().equals("b")).await());
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with multiple matching child element", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChildren(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d"),
+                            XMLElement.create("b")
+                                .setAttribute("e", "f"));
+                    test.assertEqual(
+                        Iterable.create(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d"),
+                            XMLElement.create("b")
+                                .setAttribute("e", "f")),
+                        element.removeElementChildren((XMLElement e) -> e.getName().equals("b")).await());
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                runner.test("with partially matching child elements", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChildren(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d"),
+                            XMLElement.create("b")
+                                .setAttribute("e", "f"));
+                    test.assertEqual(
+                        Iterable.create(
+                            XMLElement.create("b")
+                                .setAttribute("c", "d")),
+                        element.removeElementChildren((XMLElement e) -> e.getName().equals("b") && "d".equals(e.getAttributeValue("c").catchError().await())).await());
+                    test.assertEqual(
+                        Iterable.create(
+                            XMLElement.create("b")
+                                .setAttribute("e", "f")),
+                        element.getChildren());
+                });
+
+                runner.test("with text child elements", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a")
+                        .addChild(XMLText.create("b"));
+                    test.assertThrows(() -> element.removeElementChildren((XMLElement e) -> e.getName().equals("b")).await(),
+                        new NotFoundException("No child element found that matched the provided condition."));
+                    test.assertEqual(Iterable.create(XMLText.create("b")), element.getChildren());
                 });
             });
 

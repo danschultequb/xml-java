@@ -159,6 +159,28 @@ public class XMLElement implements XMLElementChild
         return this;
     }
 
+    public XMLElement addChildren(Iterable<XMLElementChild> children)
+    {
+        PreCondition.assertNotNull(children, "children");
+
+        for (final XMLElementChild child : children)
+        {
+            this.addChild(child);
+        }
+        return this;
+    }
+
+    public XMLElement addChildren(XMLElementChild... children)
+    {
+        PreCondition.assertNotNull(children, "children");
+
+        for (final XMLElementChild child : children)
+        {
+            this.addChild(child);
+        }
+        return this;
+    }
+
     /**
      * Remove all of the children of this XMLElement.
      * @return This object for method chaining.
@@ -184,6 +206,54 @@ public class XMLElement implements XMLElementChild
             {
                 throw new NotFoundException("Could not remove the child " + child + " because it didn't exist.");
             }
+        });
+    }
+
+    /**
+     * Remove all element children from this XMLElement with the provided name.
+     * @param childElementName The name of the element children to remove.
+     * @return The result of removing the children.
+     */
+    public Result<Iterable<XMLElement>> removeElementChildren(String childElementName)
+    {
+        PreCondition.assertNotNullAndNotEmpty(childElementName, "childElementName");
+
+        return this.removeElementChildren((XMLElement element) -> element.getName().equals(childElementName))
+            .convertError(NotFoundException.class, () -> new NotFoundException("No child element found with the name " + Strings.escapeAndQuote(childElementName) + "."));
+    }
+
+    /**
+     * Remove all element children from this XMLElement that satisfy the provided condition.
+     * @param condition The condition to check against each of the XMLElement children.
+     * @return The result of removing the children.
+     */
+    public Result<Iterable<XMLElement>> removeElementChildren(Function1<XMLElement,Boolean> condition)
+    {
+        PreCondition.assertNotNull(condition, "condition");
+
+        return Result.create(() ->
+        {
+            final List<XMLElement> result = List.create();
+            XMLElement removedElement;
+            while (true)
+            {
+                removedElement = (XMLElement)this.children.removeFirst((XMLElementChild child) -> child instanceof XMLElement && condition.run((XMLElement)child));
+                if (removedElement != null)
+                {
+                    result.add(removedElement);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (!result.any())
+            {
+                throw new NotFoundException("No child element found that matched the provided condition.");
+            }
+
+            return result;
         });
     }
 
