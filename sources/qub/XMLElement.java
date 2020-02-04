@@ -37,6 +37,21 @@ public class XMLElement implements XMLElementChild
         return this.split;
     }
 
+    /**
+     * Set whether or not this XMLElement is split into a start and end tag. If split is false, then
+     * this XMLElement cannot have any child elements.
+     * @param split Whether or not to split this XMLElement into a start and end tag.
+     * @return This object for method chaining.
+     */
+    public XMLElement setSplit(boolean split)
+    {
+        PreCondition.assertTrue(split || !this.getChildren().contains((XMLElementChild child) -> child instanceof XMLElement || !((XMLText)child).isWhitespace()), "split || !this.getChildren().contains((XMLElementChild child) -> child instanceof XMLElement || !((XMLText)child).isWhitespace())");
+
+        this.split = split;
+
+        return this;
+    }
+
     public XMLElement setAttribute(String attributeName, String attributeValue)
     {
         PreCondition.assertNotNullAndNotEmpty(attributeName, "attributeName");
@@ -187,8 +202,17 @@ public class XMLElement implements XMLElementChild
      */
     public XMLElement clearChildren()
     {
+        return this.clearChildren(false);
+    }
+
+    /**
+     * Remove all of the children of this XMLElement.
+     * @return This object for method chaining.
+     */
+    public XMLElement clearChildren(boolean split)
+    {
         this.children.clear();
-        return this;
+        return this.setSplit(split);
     }
 
     /**

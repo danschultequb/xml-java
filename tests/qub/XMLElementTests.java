@@ -68,6 +68,50 @@ public interface XMLElementTests
                 createTest.run("b", true);
             });
 
+            runner.testGroup("setSplit(boolean)", () ->
+            {
+                final Action2<XMLElement,Throwable> setSplitErrorTest = (XMLElement element, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(element, false), (Test test) ->
+                    {
+                        test.assertThrows(() -> element.setSplit(false), expected);
+                    });
+                };
+
+                setSplitErrorTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("hello")),
+                    new PreConditionFailure("split || !this.getChildren().contains((XMLElementChild child) -> child instanceof XMLElement || !((XMLText)child).isWhitespace()) cannot be false."));
+                setSplitErrorTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    new PreConditionFailure("split || !this.getChildren().contains((XMLElementChild child) -> child instanceof XMLElement || !((XMLText)child).isWhitespace()) cannot be false."));
+
+                final Action2<XMLElement,Boolean> setSplitTest = (XMLElement element, Boolean split) ->
+                {
+                    runner.test("with " + English.andList(element, split), (Test test) ->
+                    {
+                        final XMLElement setSplitResult = element.setSplit(split);
+                        test.assertSame(element, setSplitResult);
+                        test.assertEqual(split, element.isSplit());
+                    });
+                };
+
+                setSplitTest.run(XMLElement.create("a", true), false);
+                setSplitTest.run(XMLElement.create("a", true), true);
+                setSplitTest.run(XMLElement.create("a", false), false);
+                setSplitTest.run(XMLElement.create("a", false), true);
+
+                setSplitTest.run(XMLElement.create("a").addChild(XMLText.create("hello")), true);
+
+                setSplitTest.run(XMLElement.create("a").addChild(XMLElement.create("b")), true);
+
+                setSplitTest.run(XMLElement.create("a").addChild(XMLText.create(" ")), false);
+                setSplitTest.run(XMLElement.create("a").addChild(XMLText.create(" ")), true);
+                setSplitTest.run(XMLElement.create("a").addChild(XMLText.create(" ")).addChild(XMLText.create("\n")), false);
+                setSplitTest.run(XMLElement.create("a").addChild(XMLText.create(" ")).addChild(XMLText.create("\n")), true);
+            });
+
             runner.testGroup("setAttribute(String,String)", () ->
             {
                 final Action4<XMLElement,String,String,Throwable> setAttributeErrorTest = (XMLElement element, String attributeName, String attributeValue, Throwable expected) ->
