@@ -202,17 +202,8 @@ public class XMLElement implements XMLElementChild
      */
     public XMLElement clearChildren()
     {
-        return this.clearChildren(false);
-    }
-
-    /**
-     * Remove all of the children of this XMLElement.
-     * @return This object for method chaining.
-     */
-    public XMLElement clearChildren(boolean split)
-    {
         this.children.clear();
-        return this.setSplit(split);
+        return this;
     }
 
     /**
