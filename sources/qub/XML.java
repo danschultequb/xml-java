@@ -15,6 +15,21 @@ public interface XML
      */
     char[] attributeValueQuoteCharacters = new char[] { '\'', '\"' };
 
+    static Result<XMLDocument> parse(File file)
+    {
+        PreCondition.assertNotNull(file, "file");
+
+        return Result.create(() ->
+        {
+            XMLDocument result;
+            try (final CharacterReadStream readStream = new BufferedByteReadStream(file.getContentByteReadStream().await()).asCharacterReadStream())
+            {
+                result = XML.parse(readStream).await();
+            }
+            return result;
+        });
+    }
+
     /**
      * Parse an XMLDocument from the provided text.
      * @param text The text to parse.
