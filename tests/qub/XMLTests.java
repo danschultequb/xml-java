@@ -6,6 +6,64 @@ public interface XMLTests
     {
         runner.testGroup(XML.class, () ->
         {
+            runner.testGroup("parse(File)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    test.assertThrows(() -> XML.parse((File)null),
+                        new PreConditionFailure("file cannot be null."));
+                });
+
+                runner.test("with non-existing file root", (Test test) ->
+                {
+                    final InMemoryFileSystem fileSystem = new InMemoryFileSystem(test.getClock());
+                    final File file = fileSystem.getFile("/folder/file.xml").await();
+                    test.assertThrows(() -> XML.parse(file).await(),
+                        new RootNotFoundException("/"));
+                });
+
+                runner.test("with non-existing file parent", (Test test) ->
+                {
+                    final InMemoryFileSystem fileSystem = new InMemoryFileSystem(test.getClock());
+                    fileSystem.createRoot("/").await();
+                    final File file = fileSystem.getFile("/folder/file.xml").await();
+                    test.assertThrows(() -> XML.parse(file).await(),
+                        new FileNotFoundException("/folder/file.xml"));
+                });
+
+                runner.test("with non-existing file", (Test test) ->
+                {
+                    final InMemoryFileSystem fileSystem = new InMemoryFileSystem(test.getClock());
+                    fileSystem.createRoot("/").await();
+                    fileSystem.createFolder("/folder/").await();
+                    final File file = fileSystem.getFile("/folder/file.xml").await();
+                    test.assertThrows(() -> XML.parse(file).await(),
+                        new FileNotFoundException("/folder/file.xml"));
+                });
+
+                runner.test("with existing non-XML file", (Test test) ->
+                {
+                    final InMemoryFileSystem fileSystem = new InMemoryFileSystem(test.getClock());
+                    fileSystem.createRoot("/").await();
+                    final File file = fileSystem.getFile("/folder/file.xml").await();
+                    file.setContentsAsString("hello there").await();
+                    test.assertThrows(() -> XML.parse(file).await(),
+                        new ParseException("Expected only whitespace and elements at the root of the document."));
+                });
+
+                runner.test("with existing XML file", (Test test) ->
+                {
+                    final InMemoryFileSystem fileSystem = new InMemoryFileSystem(test.getClock());
+                    fileSystem.createRoot("/").await();
+                    final File file = fileSystem.getFile("/folder/file.xml").await();
+                    file.setContentsAsString("<a/>").await();
+                    test.assertEqual(
+                        XMLDocument.create()
+                            .setRoot(XMLElement.create("a")),
+                        XML.parse(file).await());
+                });
+            });
+
             runner.testGroup("parse(String)", () ->
             {
                 final Action2<String,Throwable> parseErrorTest = (String text, Throwable expected) ->
