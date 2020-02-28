@@ -210,6 +210,21 @@ public class XMLElement implements XMLElementChild
      * @return The first XML element child with the provided name or a new XML element child if no
      * XML element child with the provided name is found.
      */
+    public XMLElement getFirstOrCreateElementChild(String name)
+    {
+        PreCondition.assertNotNullAndNotEmpty(name, "name");
+
+        return this.getFirstOrCreateElementChild(name, () -> XMLElement.create(name));
+    }
+
+    /**
+     * Get the first XML element child with the provided name. If no XML element child is found with
+     * the provided name, then a new XML element child will be created, added to this XML element,
+     * and then returned.
+     * @param name The name of the XML element child to return.
+     * @return The first XML element child with the provided name or a new XML element child if no
+     * XML element child with the provided name is found.
+     */
     public XMLElement getFirstOrCreateElementChild(String name, Function0<XMLElement> elementCreator)
     {
         PreCondition.assertNotNullAndNotEmpty(name, "name");
