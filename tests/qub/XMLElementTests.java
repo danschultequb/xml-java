@@ -381,6 +381,213 @@ public interface XMLElementTests
                             .setAttribute("yummy", "yes")));
             });
 
+            runner.testGroup("getFirstElementChild(String)", () ->
+            {
+                final Action3<XMLElement,String,Throwable> getFirstElementChildErrorTest = (XMLElement element, String name, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(element, Strings.escapeAndQuote(name)), (Test test) ->
+                    {
+                        test.assertThrows(() -> element.getFirstElementChild(name).await(), expected);
+                    });
+                };
+
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), null, new PreConditionFailure("name cannot be null."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), "", new PreConditionFailure("name cannot be empty."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), "a", new NotFoundException("No XML element children found with the name \"a\"."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), "b", new NotFoundException("No XML element children found with the name \"b\"."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a").addChild(XMLElement.create("b")), "a", new NotFoundException("No XML element children found with the name \"a\"."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a").addChild(XMLElement.create("b")), "B", new NotFoundException("No XML element children found with the name \"B\"."));
+
+                final Action3<XMLElement,String,XMLElement> getFirstElementChildTest = (XMLElement element, String name, XMLElement expected) ->
+                {
+                    runner.test("with " + English.andList(element, Strings.escapeAndQuote(name)), (Test test) ->
+                    {
+                        test.assertEqual(expected, element.getFirstElementChild(name).await());
+                    });
+                };
+
+                getFirstElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "b",
+                    XMLElement.create("b"));
+                getFirstElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    "b",
+                    XMLElement.create("b").setAttribute("c", "d"));
+            });
+
+            runner.testGroup("getFirstElementChild(Function1<XMLElement,Boolean>)", () ->
+            {
+                final Action3<XMLElement,Function1<XMLElement,Boolean>,Throwable> getFirstElementChildErrorTest = (XMLElement element, Function1<XMLElement,Boolean> condition, Throwable expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        test.assertThrows(() -> element.getFirstElementChild(condition).await(), expected);
+                    });
+                };
+
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), null, new PreConditionFailure("condition cannot be null."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), element -> element.getName().equals("a"), new NotFoundException("No XML element children found that match the provided condition."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a"), element -> element.getName().equals("b"), new NotFoundException("No XML element children found that match the provided condition."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a").addChild(XMLElement.create("b")), element -> element.getName().equals("a"), new NotFoundException("No XML element children found that match the provided condition."));
+                getFirstElementChildErrorTest.run(XMLElement.create("a").addChild(XMLElement.create("b")), element -> element.getName().equals("B"), new NotFoundException("No XML element children found that match the provided condition."));
+
+                final Action3<XMLElement,Function1<XMLElement,Boolean>,XMLElement> getFirstElementChildTest = (XMLElement element, Function1<XMLElement,Boolean> condition, XMLElement expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        test.assertEqual(expected, element.getFirstElementChild(condition).await());
+                    });
+                };
+
+                getFirstElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    element -> element.getName().equals("b"),
+                    XMLElement.create("b"));
+                getFirstElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    element -> element.getName().equals("b"),
+                    XMLElement.create("b").setAttribute("c", "d"));
+                getFirstElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    element -> element.getName().equals("b") && Comparer.equal(element.getAttributeValue("e").catchError().await(), "f"),
+                    XMLElement.create("b").setAttribute("e", "f"));
+            });
+
+            runner.testGroup("getFirstOrCreateElementChild(String,Function0<XMLElement>)", () ->
+            {
+                final Action4<XMLElement,String,Function0<XMLElement>,Throwable> getFirstOrCreateElementChildErrorTest = (XMLElement element, String name, Function0<XMLElement> elementCreator, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(element, Strings.escapeAndQuote(name)), (Test test) ->
+                    {
+                        test.assertThrows(() -> element.getFirstOrCreateElementChild(name, elementCreator), expected);
+                    });
+                };
+
+                getFirstOrCreateElementChildErrorTest.run(XMLElement.create("a"), null, () -> XMLElement.create("c"), new PreConditionFailure("name cannot be null."));
+                getFirstOrCreateElementChildErrorTest.run(XMLElement.create("a"), "", () -> XMLElement.create("c"), new PreConditionFailure("name cannot be empty."));
+                getFirstOrCreateElementChildErrorTest.run(XMLElement.create("a"), "a", null, new PreConditionFailure("elementCreator cannot be null."));
+
+                final Action4<XMLElement,String,Function0<XMLElement>,XMLElement> getFirstOrCreateElementChildTest = (XMLElement element, String name, Function0<XMLElement> elementCreator, XMLElement expected) ->
+                {
+                    runner.test("with " + English.andList(element, Strings.escapeAndQuote(name)), (Test test) ->
+                    {
+                        test.assertEqual(expected, element.getFirstOrCreateElementChild(name, elementCreator));
+                        test.assertEqual(expected, element.getFirstElementChild(childElement -> childElement.equals(expected)).await());
+                    });
+                };
+
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a"),
+                    "a",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a"),
+                    "b",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "a",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "B",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "b",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("b"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    "b",
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("b").setAttribute("c", "d"));
+            });
+
+            runner.testGroup("getFirstOrCreateElementChild(Function1<XMLElement,Boolean>,Function0<XMLElement>)", () ->
+            {
+                final Action4<XMLElement,Function1<XMLElement,Boolean>,Function0<XMLElement>,Throwable> getFirstOrCreateElementChildErrorTest = (XMLElement element, Function1<XMLElement,Boolean> condition, Function0<XMLElement> elementCreator, Throwable expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        test.assertThrows(() -> element.getFirstOrCreateElementChild(condition, elementCreator), expected);
+                    });
+                };
+
+                getFirstOrCreateElementChildErrorTest.run(XMLElement.create("a"), null, () -> XMLElement.create("c"), new PreConditionFailure("condition cannot be null."));
+                getFirstOrCreateElementChildErrorTest.run(XMLElement.create("a"), element -> element.getName().equals("a"), null, new PreConditionFailure("elementCreator cannot be null."));
+
+                final Action4<XMLElement,Function1<XMLElement,Boolean>,Function0<XMLElement>,XMLElement> getFirstOrCreateElementChildTest = (XMLElement element, Function1<XMLElement,Boolean> condition, Function0<XMLElement> elementCreator, XMLElement expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        test.assertEqual(expected, element.getFirstOrCreateElementChild(condition, elementCreator));
+                        test.assertEqual(expected, element.getFirstElementChild(childElement -> childElement.equals(expected)).await());
+                    });
+                };
+
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a"),
+                    element -> element.getName().equals("a"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a"),
+                    element -> element.getName().equals("b"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    element -> element.getName().equals("a"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    element -> element.getName().equals("B"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("c"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    element -> element.getName().equals("b"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("b"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    element -> element.getName().equals("b"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("b").setAttribute("c", "d"));
+                getFirstOrCreateElementChildTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b").setAttribute("c", "d"))
+                        .addChild(XMLElement.create("b").setAttribute("e", "f")),
+                    element -> element.getName().equals("b") && Comparer.equal(element.getAttributeValue("e").catchError().await(), "f"),
+                    () -> XMLElement.create("c"),
+                    XMLElement.create("b").setAttribute("e", "f"));
+            });
+
             runner.testGroup("addChild(XMLElementChild)", () ->
             {
                 runner.test("with null", (Test test) ->

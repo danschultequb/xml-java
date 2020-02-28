@@ -165,6 +165,104 @@ public class XMLElement implements XMLElementChild
             .where(condition);
     }
 
+    /**
+     * Get the first XML element child with the provided name. If no XML element child is found with
+     * the provided name, then return a NotFoundException.
+     * @param name The name of the XML element child to return.
+     * @return The first XML element child with the provided name or a NotFoundException if no XML
+     * element child with the provided name is found.
+     */
+    public Result<XMLElement> getFirstElementChild(String name)
+    {
+        PreCondition.assertNotNullAndNotEmpty(name, "name");
+
+        return this.getFirstElementChild((XMLElement element) -> element.getName().equals(name))
+            .convertError(NotFoundException.class, () -> new NotFoundException("No XML element children found with the name " + Strings.escapeAndQuote(name) + "."));
+    }
+
+    /**
+     * Get the first XML element child that matches the provided condition. If no matching XML
+     * element child is found, then return a NotFoundException.
+     * @param condition The condition that the XML element child must match.
+     * @return The first XML element child that matches the provided condition or a
+     * NotFoundException if no XML element child that matches the provided condition is found.
+     */
+    public Result<XMLElement> getFirstElementChild(Function1<XMLElement,Boolean> condition)
+    {
+        PreCondition.assertNotNull(condition, "condition");
+
+        return Result.create(() ->
+        {
+            final Iterable<XMLElement> elements = this.getElementChildren(condition);
+            if (Iterable.isNullOrEmpty(elements))
+            {
+                throw new NotFoundException("No XML element children found that match the provided condition.");
+            }
+            return elements.first();
+        });
+    }
+
+    /**
+     * Get the first XML element child with the provided name. If no XML element child is found with
+     * the provided name, then a new XML element child will be created, added to this XML element,
+     * and then returned.
+     * @param name The name of the XML element child to return.
+     * @return The first XML element child with the provided name or a new XML element child if no
+     * XML element child with the provided name is found.
+     */
+    public XMLElement getFirstOrCreateElementChild(String name, Function0<XMLElement> elementCreator)
+    {
+        PreCondition.assertNotNullAndNotEmpty(name, "name");
+        PreCondition.assertNotNull(elementCreator, "elementCreator");
+
+        XMLElement result = this.getFirstElementChild(name)
+            .catchError(NotFoundException.class)
+            .await();
+        if (result == null)
+        {
+            result = elementCreator.run();
+            this.addChild(result);
+        }
+
+        PostCondition.assertNotNull(result, "result");
+
+        return result;
+    }
+
+    /**
+     * Get the first XML element child that matches the provided condition. If no matching XML
+     * element child is found that matches the provided condition, then a new XML element child will
+     * be created, added to this XML element, and then returned.
+     * @param condition The condition that the XML element child must match.
+     * @param elementCreator The function that will create the new XML element child if no existing
+     *                       child is found that matches the provided condition.
+     * @return The first XML element child with the provided name or a new XML element child if no
+     * XML element child that matches the provided condition is found.
+     */
+    public XMLElement getFirstOrCreateElementChild(Function1<XMLElement,Boolean> condition, Function0<XMLElement> elementCreator)
+    {
+        PreCondition.assertNotNull(condition, "condition");
+        PreCondition.assertNotNull(elementCreator, "elementCreator");
+
+        XMLElement result = this.getFirstElementChild(condition)
+            .catchError(NotFoundException.class)
+            .await();
+        if (result == null)
+        {
+            result = elementCreator.run();
+            this.addChild(result);
+        }
+
+        PostCondition.assertNotNull(result, "result");
+
+        return result;
+    }
+
+    /**
+     * Add the provided XMLElementChild to this XML element.
+     * @param child The XMLElementChild to add.
+     * @return This object for method chaining.
+     */
     public XMLElement addChild(XMLElementChild child)
     {
         PreCondition.assertNotNull(child, "child");
