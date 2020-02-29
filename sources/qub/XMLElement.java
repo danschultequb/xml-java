@@ -84,6 +84,21 @@ public class XMLElement implements XMLElementChild
         return this.attributes.map(XMLAttribute::create);
     }
 
+    /**
+     * Get whether or not this element contains an attribute with the provided name.
+     * @param attributeName The name of the attribute to look for.
+     * @return Whether or not this element contains an attribute with the provided name.
+     */
+    public boolean containsAttribute(String attributeName)
+    {
+        PreCondition.assertNotNullAndNotEmpty(attributeName, "attributeName");
+
+        return this.getAttributeValue(attributeName)
+            .then(() -> true)
+            .catchError(() -> false)
+            .await();
+    }
+
     public Result<String> getAttributeValue(String attributeName)
     {
         PreCondition.assertNotNullAndNotEmpty(attributeName, "attributeName");

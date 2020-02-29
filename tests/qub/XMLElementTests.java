@@ -167,6 +167,33 @@ public interface XMLElementTests
                 setAttributeTest.run(XMLElement.create("a"), XMLAttribute.create("b", "c"));
             });
 
+            runner.testGroup("containsAttribute(String)", () ->
+            {
+                final Action3<XMLElement,String,Throwable> containsAttributeErrorTest = (XMLElement element, String attributeName, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(Iterable.create(element, attributeName).map(Strings::escapeAndQuote)), (Test test) ->
+                    {
+                        test.assertThrows(() -> element.containsAttribute(attributeName), expected);
+                    });
+                };
+
+                containsAttributeErrorTest.run(XMLElement.create("a"), null, new PreConditionFailure("attributeName cannot be null."));
+                containsAttributeErrorTest.run(XMLElement.create("a"), "", new PreConditionFailure("attributeName cannot be empty."));
+
+                final Action3<XMLElement,String,Boolean> containsAttributeTest = (XMLElement element, String attributeName, Boolean expected) ->
+                {
+                    runner.test("with " + English.andList(Iterable.create(element, attributeName).map(Strings::escapeAndQuote)), (Test test) ->
+                    {
+                        test.assertEqual(expected, element.containsAttribute(attributeName));
+                    });
+                };
+
+                containsAttributeTest.run(XMLElement.create("a"), "b", false);
+                containsAttributeTest.run(XMLElement.create("a").setAttribute("c", "d"), "b", false);
+                containsAttributeTest.run(XMLElement.create("a").setAttribute("b", "d"), "b", true);
+                containsAttributeTest.run(XMLElement.create("a").setAttribute("B", "d"), "b", false);
+            });
+
             runner.testGroup("getAttributeValue(String)", () ->
             {
                 final Action3<XMLElement,String,Throwable> getAttributeValueErrorTest = (XMLElement element, String attributeName, Throwable expected) ->
