@@ -22,9 +22,9 @@ public interface XML
         return Result.create(() ->
         {
             XMLDocument result;
-            try (final CharacterReadStream readStream = new BufferedByteReadStream(file.getContentByteReadStream().await()).asCharacterReadStream())
+            try (final CharacterReadStream readStream = CharacterReadStream.create(BufferedByteReadStream.create(file.getContentReadStream().await())))
             {
-                result = XML.parse(readStream).await();
+                result = XML.parse(CharacterReadStream.iterate(readStream)).await();
             }
             return result;
         });
@@ -823,8 +823,8 @@ public interface XML
     {
         PreCondition.assertNotNull(toStringFunction, "toStringFunction");
 
-        final InMemoryCharacterStream stream = new InMemoryCharacterStream();
-        final IndentedCharacterWriteStream indentedStream = new IndentedCharacterWriteStream(stream);
+        final InMemoryCharacterStream stream = InMemoryCharacterStream.create();
+        final IndentedCharacterWriteStream indentedStream = IndentedCharacterWriteStream.create(stream);
         toStringFunction.run(indentedStream).await();
         return stream.getText().await();
     }
