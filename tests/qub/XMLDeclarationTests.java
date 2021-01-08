@@ -84,9 +84,9 @@ public interface XMLDeclarationTests
                 };
 
                 setStandaloneErrorTest.run(XMLDeclaration.create(), null, new PreConditionFailure("standalone cannot be null."));
-                setStandaloneErrorTest.run(XMLDeclaration.create(), "abc", new PreConditionFailure("standalone (abc) must be either , yes, or no."));
-                setStandaloneErrorTest.run(XMLDeclaration.create(), "Yes", new PreConditionFailure("standalone (Yes) must be either , yes, or no."));
-                setStandaloneErrorTest.run(XMLDeclaration.create(), "NO", new PreConditionFailure("standalone (NO) must be either , yes, or no."));
+                setStandaloneErrorTest.run(XMLDeclaration.create(), "abc", new PreConditionFailure("standalone (\"abc\") must be \"\", \"yes\", or \"no\"."));
+                setStandaloneErrorTest.run(XMLDeclaration.create(), "Yes", new PreConditionFailure("standalone (\"Yes\") must be \"\", \"yes\", or \"no\"."));
+                setStandaloneErrorTest.run(XMLDeclaration.create(), "NO", new PreConditionFailure("standalone (\"NO\") must be \"\", \"yes\", or \"no\"."));
 
                 final Action2<XMLDeclaration,String> setStandaloneTest = (XMLDeclaration declaration, String standalone) ->
                 {

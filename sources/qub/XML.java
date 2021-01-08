@@ -22,7 +22,7 @@ public interface XML
         return Result.create(() ->
         {
             XMLDocument result;
-            try (final CharacterReadStream readStream = CharacterReadStream.create(BufferedByteReadStream.create(file.getContentReadStream().await())))
+            try (final CharacterReadStream readStream = CharacterReadStream.create(BufferedByteReadStream.create(file.getContentsReadStream().await())))
             {
                 result = XML.parse(CharacterReadStream.iterate(readStream)).await();
             }
@@ -65,7 +65,7 @@ public interface XML
 
         return Result.create(() ->
         {
-            characters.ensureHasStarted();
+            characters.start();
 
             boolean isFirstSegment = true;
             final XMLDocument result = XMLDocument.create();
@@ -520,7 +520,7 @@ public interface XML
 
         return Result.create(() ->
         {
-            characters.ensureHasStarted();
+            characters.start();
 
             XML.expect(characters, XML::isWhitespaceCharacter, "whitespace");
 
@@ -541,7 +541,7 @@ public interface XML
 
         return Result.create(() ->
         {
-            characters.ensureHasStarted();
+            characters.start();
 
             final CharacterList whitespace = CharacterList.create();
             while (characters.hasCurrent() && XML.isWhitespaceCharacter(characters.getCurrent()))
@@ -563,7 +563,7 @@ public interface XML
 
         return Result.create(() ->
         {
-            characters.ensureHasStarted();
+            characters.start();
 
             final String description = XML.join(quotedStringDescription, "quoted string");
 
@@ -616,7 +616,7 @@ public interface XML
 
         return Result.create(() ->
         {
-            characters.ensureHasStarted();
+            characters.start();
 
             XML.expect(characters, XML::isNameStartCharacter, XML.join(nameDescription, "name start character"));
 

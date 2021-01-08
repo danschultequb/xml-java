@@ -114,7 +114,7 @@ public interface XMLAttributeTests
                 createErrorTest.run(null, "hello", '\"', new PreConditionFailure("name cannot be null."));
                 createErrorTest.run("", "hello", '\"', new PreConditionFailure("name cannot be empty."));
                 createErrorTest.run("a", null, '\"', new PreConditionFailure("value cannot be null."));
-                createErrorTest.run("a", "", 'a', new PreConditionFailure("valueQuoteCharacter (a) must be either ' or \"."));
+                createErrorTest.run("a", "", 'a', new PreConditionFailure("valueQuoteCharacter (\"a\") must be \"'\" or \"\\\"\"."));
 
                 final Action3<String,String,Character> createTest = (String name, String value, Character valueQuoteCharacter) ->
                 {
