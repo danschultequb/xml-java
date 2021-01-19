@@ -400,6 +400,58 @@ public class XMLElement implements XMLElementChild
         });
     }
 
+    /**
+     * Get the text contained by this XMLElement.
+     * @return The text contained by this XMLElement.
+     */
+    public String getText()
+    {
+        final CharacterList list = CharacterList.create();
+        this.getText(list);
+        return list.toString();
+    }
+
+    /**
+     * Add the text contained by this XMLElement to the provided CharacterList.
+     * @param output The CharacterList to add this XMLElement's text to.
+     * @return The number of characters that were added.
+     */
+    public int getText(CharacterList output)
+    {
+        PreCondition.assertNotNull(output, "output");
+
+        int result = 0;
+        for (final XMLElementChild child : this.children)
+        {
+            if (child instanceof XMLText)
+            {
+                final String childText = ((XMLText)child).getText();
+                output.addAll(childText);
+                result += childText.length();
+            }
+            else if (child instanceof XMLElement)
+            {
+                result += ((XMLElement)child).getText(output);
+            }
+        }
+
+        PostCondition.assertGreaterThanOrEqualTo(result, 0, "result");
+
+        return result;
+    }
+
+    /**
+     * Add an XMLText child with the provided text to this XMLElement.
+     * @param text The text to add.
+     * @return This object for method chaining.
+     */
+    public XMLElement addText(String text)
+    {
+        PreCondition.assertNotNull(text, "text");
+
+        return this.addChild(XMLText.create(text));
+    }
+
     @Override
     public String toString()
     {

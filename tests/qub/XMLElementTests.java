@@ -937,6 +937,154 @@ public interface XMLElementTests
                 });
             });
 
+            runner.testGroup("getText()", () ->
+            {
+                final Action2<XMLElement,String> getTextTest = (XMLElement element, String expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        test.assertEqual(expected, element.getText());
+                    });
+                };
+
+                getTextTest.run(
+                    XMLElement.create("a"),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b"))
+                        .addChild(XMLElement.create("c")),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b")),
+                    "b");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLText.create("c")),
+                    "bc");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLElement.create("c")
+                            .addChild(XMLText.create("d")))
+                        .addChild(XMLText.create("e")),
+                    "bde");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLCData.create("c"))
+                        .addChild(XMLText.create("d")),
+                    "bd");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLComment.create("c"))
+                        .addChild(XMLText.create("d")),
+                    "bd");
+            });
+
+            runner.testGroup("getText(CharacterList)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.getText(null),
+                        new PreConditionFailure("output cannot be null."));
+                });
+
+                final Action2<XMLElement,String> getTextTest = (XMLElement element, String expected) ->
+                {
+                    runner.test("with " + element, (Test test) ->
+                    {
+                        final CharacterList list = CharacterList.create();
+                        final int getTextResult = element.getText(list);
+                        test.assertEqual(expected, list.toString());
+                        test.assertEqual(expected.length(), getTextResult);
+                    });
+                };
+
+                getTextTest.run(
+                    XMLElement.create("a"),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b")),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("b"))
+                        .addChild(XMLElement.create("c")),
+                    "");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b")),
+                    "b");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLText.create("c")),
+                    "bc");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLElement.create("c")
+                            .addChild(XMLText.create("d")))
+                        .addChild(XMLText.create("e")),
+                    "bde");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLCData.create("c"))
+                        .addChild(XMLText.create("d")),
+                    "bd");
+                getTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLText.create("b"))
+                        .addChild(XMLComment.create("c"))
+                        .addChild(XMLText.create("d")),
+                    "bd");
+            });
+
+            runner.testGroup("addText(String)", () ->
+            {
+                runner.test("with null", (Test test) ->
+                {
+                    final XMLElement element = XMLElement.create("a");
+                    test.assertThrows(() -> element.addText(null),
+                        new PreConditionFailure("text cannot be null."));
+                    test.assertEqual(Iterable.create(), element.getChildren());
+                });
+
+                final Action3<XMLElement,String,Iterable<? extends XMLElementChild>> addTextTest = (XMLElement element, String text, Iterable<? extends XMLElementChild> expectedChildren) ->
+                {
+                    runner.test("with " + English.andList(element, Strings.escapeAndQuote(text)), (Test test) ->
+                    {
+                        final XMLElement addTextResult = element.addText(text);
+                        test.assertSame(element, addTextResult);
+                        test.assertEqual(expectedChildren, element.getChildren());
+                    });
+                };
+
+                addTextTest.run(
+                    XMLElement.create("a"),
+                    "b",
+                    Iterable.create(
+                        XMLText.create("b")));
+                addTextTest.run(
+                    XMLElement.create("a")
+                        .addChild(XMLElement.create("z")),
+                    "b",
+                    Iterable.create(
+                        XMLElement.create("z"),
+                        XMLText.create("b")));
+            });
+
             runner.testGroup("toString()", () ->
             {
                 final Action2<XMLElement,String> toStringTest = (XMLElement element, String expected) ->
