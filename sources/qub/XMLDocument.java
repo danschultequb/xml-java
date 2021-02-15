@@ -54,6 +54,21 @@ public class XMLDocument
         return XML.toString(format, this::toString);
     }
 
+    public Result<Integer> toString(CharacterWriteStream stream)
+    {
+        return this.toString(stream, XMLFormat.consise);
+    }
+
+    public Result<Integer> toString(CharacterWriteStream stream, XMLFormat format)
+    {
+        return this.toString(IndentedCharacterWriteStream.create(stream), format);
+    }
+
+    public Result<Integer> toString(IndentedCharacterWriteStream stream)
+    {
+        return this.toString(stream, XMLFormat.consise);
+    }
+
     public Result<Integer> toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
         PreCondition.assertNotNull(stream, "stream");

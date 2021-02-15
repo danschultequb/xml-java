@@ -463,6 +463,28 @@ public class XMLElement implements XMLElementChild
         return XML.toString(format, this::toString);
     }
 
+    public Result<Integer> toString(CharacterWriteStream stream)
+    {
+        PreCondition.assertNotNull(stream, "stream");
+
+        return this.toString(stream, XMLFormat.consise);
+    }
+
+    public Result<Integer> toString(CharacterWriteStream stream, XMLFormat format)
+    {
+        PreCondition.assertNotNull(stream, "stream");
+        PreCondition.assertNotNull(format, "format");
+
+        return this.toString(IndentedCharacterWriteStream.create(stream), format);
+    }
+
+    public Result<Integer> toString(IndentedCharacterWriteStream stream)
+    {
+        PreCondition.assertNotNull(stream, "stream");
+
+        return this.toString(stream, XMLFormat.consise);
+    }
+
     @Override
     public Result<Integer> toString(IndentedCharacterWriteStream stream, XMLFormat format)
     {
