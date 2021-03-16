@@ -16,7 +16,7 @@ public interface XMLTests
 
                 runner.test("with non-existing file root", (Test test) ->
                 {
-                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create(test.getClock());
+                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create();
                     final File file = fileSystem.getFile("/folder/file.xml").await();
                     test.assertThrows(() -> XML.parse(file).await(),
                         new RootNotFoundException("/"));
@@ -24,7 +24,7 @@ public interface XMLTests
 
                 runner.test("with non-existing file parent", (Test test) ->
                 {
-                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create(test.getClock());
+                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create();
                     fileSystem.createRoot("/").await();
                     final File file = fileSystem.getFile("/folder/file.xml").await();
                     test.assertThrows(() -> XML.parse(file).await(),
@@ -33,7 +33,7 @@ public interface XMLTests
 
                 runner.test("with non-existing file", (Test test) ->
                 {
-                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create(test.getClock());
+                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create();
                     fileSystem.createRoot("/").await();
                     fileSystem.createFolder("/folder/").await();
                     final File file = fileSystem.getFile("/folder/file.xml").await();
@@ -43,7 +43,7 @@ public interface XMLTests
 
                 runner.test("with existing non-XML file", (Test test) ->
                 {
-                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create(test.getClock());
+                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create();
                     fileSystem.createRoot("/").await();
                     final File file = fileSystem.getFile("/folder/file.xml").await();
                     file.setContentsAsString("hello there").await();
@@ -53,7 +53,7 @@ public interface XMLTests
 
                 runner.test("with existing XML file", (Test test) ->
                 {
-                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create(test.getClock());
+                    final InMemoryFileSystem fileSystem = InMemoryFileSystem.create();
                     fileSystem.createRoot("/").await();
                     final File file = fileSystem.getFile("/folder/file.xml").await();
                     file.setContentsAsString("<a/>").await();
