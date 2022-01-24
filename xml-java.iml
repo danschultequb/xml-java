@@ -21,5 +21,18 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://C:/qub/qub/lib-java/versions/171/lib-java.jar!/"/>
+          <root url="jar://C:/qub/qub/lib-java/versions/171/lib-java.tests.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES>
+          <root url="jar://C:/qub/qub/lib-java/versions/171/lib-java.sources.jar!/"/>
+          <root url="jar://C:/qub/qub/lib-java/versions/171/lib-java.test.sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
