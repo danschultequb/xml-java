@@ -206,15 +206,12 @@ public class XMLElement implements XMLElementChild
     {
         PreCondition.assertNotNull(condition, "condition");
 
-        return Result.create(() ->
-        {
-            final Iterable<XMLElement> elements = this.getElementChildren(condition);
-            if (Iterable.isNullOrEmpty(elements))
+        return this.getElementChildren()
+            .first(condition)
+            .convertError(NotFoundException.class, () ->
             {
-                throw new NotFoundException("No XML element children found that match the provided condition.");
-            }
-            return elements.first();
-        });
+                return new NotFoundException("No XML element children found that match the provided condition.");
+            });
     }
 
     /**
